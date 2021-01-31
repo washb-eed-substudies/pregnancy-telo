@@ -6,121 +6,41 @@ rm(list=ls())
 
 source(here::here("0-config.R"))
 
-d<-readRDS(paste0(dropboxDir, "Data/Cleaned/Andrew/stress_growth_data.RDS"))
+d<-readRDS(paste0(dropboxDir, "Data/Cleaned/Audrie/pregnancy_telo_covariates_data.RDS"))
 
 #Set list of adjustment variables
 #Make vectors of adjustment variable names
 Wvars<-c("sex","birthord", "momage","momheight","momedu", 
          "hfiacat", "Nlt18","Ncomp", "watmin", "walls", "floor", "HHwealth",
-         "cesd_sum_t2", "diar7d_t2", "tr", "life_viol_any_t3")
+         "tr", "life_viol_any_t3", "viol_any_preg")
 
 Wvars[!(Wvars %in% colnames(d))]
 
 
 
 #Add in time varying covariates:
+Wvars2 <- c(Wvars, c("ageday_ht2", "month_blood_t0", "month_ht2"))
+Wvars3 <- c(Wvars, c("ageday_ht3", "month_blood_t0", "month_ht3"))
+Wvars23 <- c(Wvars, c("ageday_ht2", "ageday_ht3", "month_blood_t0", "month_ht2", "month_ht3"))
 
-Wvars2_anthro<-c("ageday_at2", "month_at2")
-Wvars3_anthro<-c("ageday_at3", "month_at3", "diar7d_t3", "cesd_sum_ee_t3", "pss_sum_mom_t3", "life_viol_any_t3")  
-
-Wvars2_F2<-c("ageday_ut2", "month_ut2") 
-Wvars3_vital<-c("laz_t2", "waz_t2", "ageday_t3_vital", "month_vt3", "cesd_sum_ee_t3", "pss_sum_mom_t3", "diar7d_t3", "life_viol_any_t3") 
-Wvars3_salimetrics<-c("laz_t2", "waz_t2", "ageday_t3_salimetrics", "month_lt3", "cesd_sum_ee_t3", "pss_sum_mom_t3", "diar7d_t3", "life_viol_any_t3") 
-Wvars3_oragene<-c("laz_t2", "waz_t2", "ageday_t3_oragene", "month_ot3", "cesd_sum_ee_t3", "pss_sum_mom_t3", "diar7d_t3", "life_viol_any_t3") 
-
-
-#Add in time-varying covariates
-# W<- subset(d, select=Wvars)
-# W2_anthro<- subset(d, select=Wvars2_anthro)
-# W3_anthro<- subset(d, select=Wvars3_anthro)
-# 
-# W2_F2<- subset(d, select=Wvars2_F2)
-# W3_vital<- subset(d, select=Wvars3_vital)
-# W3_salimetrics<- subset(d, select=Wvars3_salimetrics)
-# W3_oragene<- subset(d, select=Wvars3_oragene)
-
-# W2_F2.W2_anthro <- cbind(W2_F2,W2_anthro) %>% subset(., select = which(!duplicated(names(.))))
-# W2_F2.W3_anthro <- cbind(W2_F2,W3_anthro) %>% subset(., select = which(!duplicated(names(.))))
-# W2_F2.W2_anthro.W3_anthro <- cbind(W2_F2,W2_anthro,W3_anthro) %>% subset(., select = which(!duplicated(names(.))))
-# W3_vital.W3_anthro <- cbind(W3_vital,W3_anthro) %>% subset(., select = which(!duplicated(names(.))))
-# W3_salimetrics.W3_anthro <- cbind(W3_salimetrics,W3_anthro) %>% subset(., select = which(!duplicated(names(.))))
-# W3_oragene.W3_anthro <- cbind(W3_oragene,W3_anthro) %>% subset(., select = which(!duplicated(names(.))))
-# 
-
-# add hcz and time of day measurement later in pick covariates function 
-W2_F2.W2_anthro <- c(Wvars, Wvars2_F2 ,Wvars2_anthro) %>% unique(.)
-W2_F2.W3_anthro <- c(Wvars, Wvars2_F2 ,Wvars3_anthro, 
-                     "laz_t2", "waz_t2") %>% unique(.)
-W2_F2.W23_anthro <- c(Wvars, Wvars2_F2, Wvars2_anthro, Wvars3_anthro)
-# W3_vital.W3_anthro <- c(Wvars, Wvars3_vital,Wvars3_anthro) %>% unique(.)
-# W3_salimetrics.W3_anthro <- c(Wvars, Wvars3_salimetrics,Wvars3_anthro) %>% unique(.)
-# W3_oragene.W3_anthro <- c(Wvars, Wvars3_oragene,Wvars3_anthro) %>% unique(.)
-W3_vital.W3_anthro <- c(Wvars, Wvars3_vital, Wvars3_anthro) %>% unique(.)
-W3_salimetrics.W3_anthro <- c(Wvars, Wvars3_salimetrics, Wvars3_anthro) %>% unique(.)
-W3_oragene.W3_anthro <- c(Wvars, Wvars3_oragene, Wvars3_anthro) %>% unique(.)
-
-
-pick_covariates <- function(i, j){
-  # i is exposure as string
+pick_covariates <- function(j){
   # j is outcome as string
-  # choose correct/build correct adjustment set based on exposure and outcome
-  if(grepl("t2_f2", i)){
-    if(grepl("_t2_t3", j)){Wset = W2_F2.W23_anthro}
-    else if(grepl("_t2", j)){Wset = W2_F2.W2_anthro}
-    else if(grepl("_t3", j)){Wset = W2_F2.W3_anthro}}
-  else if(grepl("slope", i)){Wset = c(W3_salimetrics.W3_anthro, "t3_col_time_z01_cont")}
-  else if(grepl("residual", i)){Wset = W3_salimetrics.W3_anthro}
-  else if(i %in% c("t3_map", "t3_hr_mean")){Wset = W3_vital.W3_anthro}
-  else{Wset = W3_oragene.W3_anthro}
-  
-  if(j=="hcz_t3"){Wset=c(Wset, "hcz_t2")}
+  # choose correct adjustment set based on outcome
+  if(grepl("t2", j)){Wset = Wvars2}
+  else if(grepl("t3", j)){Wset = Wvars3}
+  else{Wset = Wvars23}
   return(Wset)
 }
 
 
 
+
 #Loop over exposure-outcome pairs
 
-##Hypothesis 1a
-#Urinary creatine-adjusted F2-isoprostanes isomer score  at Year 1 is negatively associated with 
-#concurrent child LAZ, WAZ, WLZ, and head circumference-for-age Z score at Year 1.
-
-# Exposure: Quartile of F2-isoprostanes isomer score
-# Primary Outcome  : Child LAZ at Year 1
-# Secondary Outcome: Child WAZ and head circumference-for-age Z score at Year 1
-# Tertiary Outcomes: Child WLZ at Year 1
-
-##Hypothesis 1b
-#Urinary creatine-adjusted F2-isoprostanes isomer score at Year 1 is negatively 
-#associated with child growth velocity (kg/month or cm/month) between the Year 1 and Year 2 visits.	
-
-#Exposure: Quartile of F2-isoprostanes isomer score
-#Primary Outcome: Child length velocity (in cm/month) from Year 1 to Year 2
-#Secondary Outcome: Child weight velocity (in kg/month) and head circumference velocity (in cm/month) from Year 1 to Year 2
-
-## Hypothesis 1c
-#Urinary creatine-adjusted F2-isoprostanes isomer score at Year 1 is negatively 
-#associated with subsequent child LAZ, WAZ, WLZ, and head circumference-for-age Z score at Year 2. 
-
-#Exposure: Quartile of F2-isoprostanes isomer score
-#Primary Outcome: Child LAZ at Year 2
-#Secondary Outcome: Child WAZ and head circumference-for-age Z score at Year 2
-#Tertiary Outcome: Child WLZ at Year 2
-
-##Hypothesis 1d
-#Urinary creatine-adjusted F2-isoprostanes isomer score at Year 1 is negatively 
-#associated with the change in child LAZ, WAZ, WLZ, and head circumference-for-age Z score from Year 1 to Year 2. 
-
-#Exposure: Quartiles of F2-isoprostanes isomer score
-#Primary Outcome: Change in child LAZ from Year 1 to Year 2
-#Secondary Outcome: Change in child WAZ and head circumference-for-age Z score from Year 1 to Year 2
-#Tertiary Outcomes: Change in child WLZ from Year 1 to Year 2
-
-Xvars <- c("t2_f2_8ip", "t2_f2_23d", "t2_f2_VI", "t2_f2_12i", "iso.pca")            
-Yvars <- c("laz_t2", "waz_t2", "whz_t2" ,"hcz_t2", 
-           "len_velocity_t2_t3", "wei_velocity_t2_t3", "hc_velocity_t2_t3",
-           "laz_t3", "waz_t3", "whz_t3", "hcz_t3",
-           "delta_laz_t2_t3", "delta_waz_t2_t3", "delta_whz_t2_t3", "delta_hcz_t2_t3")
+##Hypothesis 1
+#Maternal nutrition is positively associated with child telomere length
+Xvars <- c("vitD_nmol_per_L", "logFERR_inf", "logSTFR_inf", "logRBP_inf")            
+Yvars <- c("TS_t2_Z", "TS_t3_Z", "delta_TS_Z")
 
 #Fit models
 H1_adj_models <- NULL
@@ -128,7 +48,7 @@ for(i in Xvars){
   for(j in Yvars){
     print(i)
     print(j)
-    Wset<-pick_covariates(i, j)
+    Wset<-pick_covariates(j)
     res_adj <- fit_RE_gam(d=d, X=i, Y=j,  W=Wset)
     res <- data.frame(X=i, Y=j, fit=I(list(res_adj$fit)), dat=I(list(res_adj$dat)))
     H1_adj_models <- bind_rows(H1_adj_models, res)
@@ -170,44 +90,12 @@ saveRDS(H1_adj_res, here("results/adjusted/H1_adj_res.RDS"))
 saveRDS(H1_adj_plot_data, paste0(dropboxDir,"results/stress-growth-models/figure-data/H1_adj_spline_data.RDS"))
 
 
-## Hypothesis 2a
-#Change in slope between pre- and post-stressor cortisol measured at Year 2 is positively associated 
-#with concurrent child LAZ, WAZ, WLZ, and head circumference-for-age Z score at Year 2.
+## Hypothesis 2
+# Maternal stress is negatively associated with child telomere length and postively correlated with
+# change in telomere length
 
-#Exposure: Quartiles of pre- and post-stressor cortisol at Year 2
-#Primary Outcome: Child LAZ at Year 2
-#Secondary Outcome: Child WAZ and head circumference-for-age Z score at Year 2
-#Tertiary Outcome: Child WLZ at Year 2
-
-##Hypothesis 2b
-#Residualized gain score for cortisol measured at Year 2 is positively associated 
-#with concurrent child LAZ, WAZ, WLZ, and head circumference-for-age Z score at Year 2.
-
-#Exposure: Quartiles of pre- and post-stressor cortisol at Year 2
-#Primary Outcome: Child LAZ at Year 2
-#Secondary Outcome: Child WAZ and head circumference-for-age Z score at Year 2
-#Tertiary Outcomes: Child WLZ at Year 2
-
-##Hypothesis 2c
-#Change in slope between pre- and post-stressor alpha-amylase measured at Year 2 is negatively associated 
-#with concurrent child LAZ, WAZ, WLZ, and head circumference-for-age Z score at Year 2.
-
-#Exposure: Quartiles of pre- and post-stressor alpha-amylase at Year 2
-#Primary Outcome: Child LAZ at Year 2
-#Secondary Outcome: Child WAZ and head circumference-for-age Z score at Year 2
-#Tertiary Outcome: Child WLZ at Year 2
-
-##Hypothesis 2d
-#Residualized gain score for alpha-amylase measured at Year 2 is negatively associated 
-#with concurrent child LAZ, WAZ, WLZ, and head circumference-for-age Z score at Year 2.
-
-#Exposure: Quartiles of pre- and post-stressor alpha-amylase at Year 2
-#Primary Outcome: Child LAZ at Year 2
-#Secondary Outcome: Child WAZ and head circumference-for-age Z score at Year 2
-#Tertiary Outcome: Child WLZ at Year 2
-
-Xvars <- c("t3_cort_slope", "t3_residual_cort", "t3_saa_slope", "t3_residual_saa")            
-Yvars <- c("laz_t3", "waz_t3", "whz_t3", "hcz_t3")
+Xvars <- c("preg_cort")            
+Yvars <- c("TS_t2_Z", "TS_t3_Z", "delta_TS_Z")
 
 #Fit models
 H2_adj_models <- NULL
@@ -215,7 +103,7 @@ for(i in Xvars){
   for(j in Yvars){
     print(i)
     print(j)
-    Wset<-pick_covariates(i, j)
+    Wset<-pick_covariates(j)
     res_adj <- fit_RE_gam(d=d, X=i, Y=j,  W=Wset)
     res <- data.frame(X=i, Y=j, fit=I(list(res_adj$fit)), dat=I(list(res_adj$dat)))
     H2_adj_models <- bind_rows(H2_adj_models, res)
@@ -257,27 +145,10 @@ saveRDS(H2_adj_plot_data, paste0(dropboxDir,"results/stress-growth-models/figure
 
 
 
-##Hypothesis 3a
-#Mean arterial pressure measured at Year 2 is negatively associated with concurrent 
-#child LAZ, WAZ, WLZ, and head circumference-for-age Z score at Year 2.
+##Hypothesis 3
 
-#Exposure: Quartiles of mean arterial pressure at Year 2
-#Primary Outcome: Child LAZ at Year 2
-#Secondary Outcome: Child WAZ and head circumference-for-age Z score at Year 2
-#Tertiary Outcomes: Child WLZ at Year 2
-
-##Hypothesis 3b
-#Resting heart rate measured at Year 2 is negatively associated with concurrent 
-#child LAZ, WAZ, WLZ, and head circumference-for-age Z score at Year 2.
-
-#Exposure: Quartiles of resting heart rate at Year 2
-#Primary Outcome: Child LAZ at Year 2
-#Secondary Outcome: Child WAZ and head circumference-for-age Z score at Year 2
-#Tertiary Outcomes: Child WLZ at Year 2
-
-Xvars <- c("t3_map", "t3_hr_mean")            
-Yvars <- c("laz_t3", "waz_t3", "whz_t3", "hcz_t3")
-
+Xvars <- c("logCRP", "logAGP", "ifng_mom_t0", "sumscore_t0_mom_Z")            
+Yvars <- c("TS_t2_Z", "TS_t3_Z", "delta_TS_Z")
 
 #Fit models
 H3_models <- NULL
@@ -285,7 +156,7 @@ for(i in Xvars){
   for(j in Yvars){
     print(i)
     print(j)
-    Wset<-pick_covariates(i, j)
+    Wset<-pick_covariates(j)
     res_adj <- fit_RE_gam(d=d, X=i, Y=j,  W=Wset)
     res <- data.frame(X=i, Y=j, fit=I(list(res_adj$fit)), dat=I(list(res_adj$dat)))
     H3_models <- bind_rows(H3_models, res)
@@ -325,26 +196,12 @@ saveRDS(H3_res, here("results/adjusted/H3_adj_res.RDS"))
 saveRDS(H3_plot_data, paste0(dropboxDir,"results/stress-growth-models/figure-data/H3_adj_spline_data.RDS"))
 
 
-##Hypothesis 4a
-#Glucocorticoid receptor (NR3C1) exon 1F promoter methylation in saliva samples at Year 2 
-#is negatively associated with concurrent child LAZ, WAZ, WLZ, and head circumference-for-age Z score at Year 2.
+##Hypothesis 4
+# Maternal estriol is positively associated with child telomere length
 
-#Exposure: Quartiles of overall percentage of methylation across the entire promoter region at Year 2 post-intervention
-#Primary Outcome: Child LAZ at Year 2
-#Secondary Outcome: Child WAZ and head circumference-for-age Z score at Year 2
-#Tertiary Outcomes: Child WLZ at Year 2
+Xvars <- c("preg_estri")            
+Yvars <- c("TS_t2_Z", "TS_t3_Z", "delta_TS_Z")
 
-##Hypothesis 4b
-#Glucocorticoid receptor NGFI-A transcription factor binding site methylation in saliva samples at Year 2 
-#is negatively associated with concurrent child LAZ, WAZ, WLZ, and head circumference-for-age Z score at Year 2.
-
-#Exposure: Quartiles of percentage methylation at NGFI-A transcription factor binding 	site (CpG site #12)
-#Primary Outcome: Child LAZ at Year 2
-#Secondary Outcome: Child WAZ and head circumference-for-age Z score at Year 2
-#Tertiary Outcomes: Child WLZ at Year 2
-
-Xvars <- c("t3_gcr_mean", "t3_gcr_cpg12")            
-Yvars <- c("laz_t3", "waz_t3", "whz_t3", "hcz_t3")
 
 #Fit models
 H4_models <- NULL
@@ -352,7 +209,7 @@ for(i in Xvars){
   for(j in Yvars){
     print(i)
     print(j)
-    Wset<-pick_covariates(i, j)
+    Wset<-pick_covariates(j)
     res_adj <- fit_RE_gam(d=d, X=i, Y=j,  W=Wset)
     res <- data.frame(X=i, Y=j, fit=I(list(res_adj$fit)), dat=I(list(res_adj$dat)))
     H4_models <- bind_rows(H4_models, res)
@@ -390,3 +247,4 @@ saveRDS(H4_res, here("results/adjusted/H4_adj_res.RDS"))
 
 #Save plot data
 saveRDS(H4_plot_data, paste0(dropboxDir,"results/stress-growth-models/figure-data/H4_adj_spline_data.RDS"))
+

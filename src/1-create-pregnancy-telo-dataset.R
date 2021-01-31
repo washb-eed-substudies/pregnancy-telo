@@ -118,6 +118,56 @@ dfull <- left_join(d1, d_sum, by="dataid")
 
 
 ############# Check covariate missingness ###################
+exp <- c("vitD_nmol_per_L", "logFERR_inf", "logSTFR_inf", "logRBP_inf",
+         "preg_cort", "logCRP", "logAGP", "ifng_mom_t0", "sumscore_t0_mom_Z", "preg_cort")
+out <- c("TS_t2_Z", "TS_t3_Z", "delta_TS_Z")
+
+Wvars<-c("sex","birthord", "momage","momheight","momedu", 
+         "hfiacat", "Nlt18","Ncomp", "watmin", "walls", "floor", "roof", "HHwealth",
+         "tr", "life_viol_any_t3", "viol_any_preg", "ageday_ht2", "ageday_ht3", 
+         "month_blood_t0", "month_ht2", "month_ht3") %>% unique()
+
+W <- dfull %>% select(all_of(Wvars))  
+
+miss <- data.frame(name = names(W), missing = colSums(is.na(W))/nrow(W), row.names = c(1:ncol(W)))
+for (i in 1:nrow(miss)) {
+  miss$class[i] <- class(W[,which(colnames(W) == miss[i, 1])])
+}
+miss
+
+for (w in Wvars){
+  print(w)
+  if(is.numeric(W[,w])){
+    print(summary(W[,w]))
+  }
+  else{print(table(W[,w]))}
+}
+
+# roof has low variability
+mean(W$roof, na.rm=T)
+sd(W$roof, na.rm=T)
+# remove roof from covariates
+
+# add missingness category to IPV covariates
+dfull$life_viol_any_t3<-as.factor(dfull$life_viol_any_t3)
+dfull$life_viol_any_t3<-addNA(dfull$life_viol_any_t3)
+levels(dfull$life_viol_any_t3)[length(levels(dfull$life_viol_any_t3))]<-"Missing"
+
+dfull$viol_any_preg<-as.factor(dfull$viol_any_preg)
+dfull$viol_any_preg<-addNA(dfull$viol_any_preg)
+levels(dfull$viol_any_preg)[length(levels(dfull$viol_any_preg))]<-"Missing"
+
+for(outcome in out){
+  d_sub <- subset(dfull, !is.na(dfull[,outcome]))
+  W_sub <- d_sub %>% select(all_of(Wvars))  
+  
+  miss_sub <- data.frame(name = names(W_sub), missing = colSums(is.na(W_sub)), row.names = c(1:ncol(W_sub)))
+  for (i in 1:nrow(miss_sub)) {
+    miss_sub$class[i] <- class(W_sub[,which(colnames(W_sub) == miss_sub[i, 1])])
+  }
+  print(outcome)
+  print(miss_sub)
+}
 
 
 

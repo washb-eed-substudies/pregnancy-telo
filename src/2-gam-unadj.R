@@ -2,72 +2,14 @@ rm(list=ls())
  
 source(here::here("0-config.R"))
 
-d<-readRDS(paste0(dropboxDir, "Data/Cleaned/Andrew/stress_growth_data.RDS"))
-
-#Example:
-
-#Fit GAM model with random effects for childid
-res_unadj <- fit_RE_gam(d=d, X="t3_cort_z01", Y="laz_t3",  W=NULL)
-
-#Get predictions of differences from the 25th percentile of exposure
-preds_unadj <- predict_gam_diff(fit=res_unadj$fit, d=res_unadj$dat, quantile_diff=c(0.25,0.75), Xvar="delta_TS", Yvar="laz_t3")
-
-
-#Primary parameter we are estimating: difference between 25th and 75th percentile of the exposure
-preds_unadj$res
-
-#Plot the difference from the 25th percentile for the full range of the exposure:
-#NOTE: not making these plots anymore, just using for diagnostics
-p <- plot_gam_diff(preds_unadj$plotdf)
-print(p)
-
-#Fit spline with simultaneous confidence intervals
-simul_plot <- gam_simul_CI(res_unadj$fit, res_unadj$dat, xlab="delta_TS", ylab="laz_t3", title="example title")
-simul_plot$p
-
+d<-readRDS(paste0(dropboxDir, "Data/Cleaned/Audrie/pregnancy_telo_covariates_data.RDS"))
 
 #Loop over exposure-outcome pairs
 
-##Hypothesis 1a
-#Urinary creatine-adjusted F2-isoprostanes isomer score  at Year 1 is negatively associated with 
-#concurrent child LAZ, WAZ, WLZ, and head circumference-for-age Z score at Year 1.
-
-# Exposure: Quartile of F2-isoprostanes isomer score
-# Primary Outcome  : Child LAZ at Year 1
-# Secondary Outcome: Child WAZ and head circumference-for-age Z score at Year 1
-# Tertiary Outcomes: Child WLZ at Year 1
-
-##Hypothesis 1b
-#Urinary creatine-adjusted F2-isoprostanes isomer score at Year 1 is negatively 
-#associated with child growth velocity (kg/month or cm/month) between the Year 1 and Year 2 visits.	
-
-#Exposure: Quartile of F2-isoprostanes isomer score
-#Primary Outcome: Child length velocity (in cm/month) from Year 1 to Year 2
-#Secondary Outcome: Child weight velocity (in kg/month) and head circumference velocity (in cm/month) from Year 1 to Year 2
-
-## Hypothesis 1c
-#Urinary creatine-adjusted F2-isoprostanes isomer score at Year 1 is negatively 
-#associated with subsequent child LAZ, WAZ, WLZ, and head circumference-for-age Z score at Year 2. 
-
-#Exposure: Quartile of F2-isoprostanes isomer score
-#Primary Outcome: Child LAZ at Year 2
-#Secondary Outcome: Child WAZ and head circumference-for-age Z score at Year 2
-#Tertiary Outcome: Child WLZ at Year 2
-
-##Hypothesis 1d
-#Urinary creatine-adjusted F2-isoprostanes isomer score at Year 1 is negatively 
-#associated with the change in child LAZ, WAZ, WLZ, and head circumference-for-age Z score from Year 1 to Year 2. 
-
-#Exposure: Quartiles of F2-isoprostanes isomer score
-#Primary Outcome: Change in child LAZ from Year 1 to Year 2
-#Secondary Outcome: Change in child WAZ and head circumference-for-age Z score from Year 1 to Year 2
-#Tertiary Outcomes: Change in child WLZ from Year 1 to Year 2
-
-Xvars <- c("t2_f2_8ip", "t2_f2_23d", "t2_f2_VI", "t2_f2_12i", "iso.pca")            
-Yvars <- c("laz_t2", "waz_t2", "whz_t2" ,"hcz_t2", 
-           "len_velocity_t2_t3", "wei_velocity_t2_t3", "hc_velocity_t2_t3",
-           "laz_t3", "waz_t3", "whz_t3", "hcz_t3",
-           "delta_laz_t2_t3", "delta_waz_t2_t3", "delta_whz_t2_t3", "delta_hcz_t2_t3")
+##Hypothesis 1
+#Maternal nutrition is positively associated with child telomere length
+Xvars <- c("vitD_nmol_per_L", "logFERR_inf", "logSTFR_inf", "logRBP_inf")            
+Yvars <- c("TS_t2_Z", "TS_t3_Z", "delta_TS_Z")
 
 #Fit models
 H1_models <- NULL
@@ -113,44 +55,12 @@ saveRDS(H1_plot_data, here("figure-data/H1_unadj_spline_data.RDS"))
 
 
 
-## Hypothesis 2a
-#Change in slope between pre- and post-stressor cortisol measured at Year 2 is positively associated 
-#with concurrent child LAZ, WAZ, WLZ, and head circumference-for-age Z score at Year 2.
+## Hypothesis 2
+# Maternal stress is negatively associated with child telomere length and postively correlated with
+# change in telomere length
 
-#Exposure: Quartiles of pre- and post-stressor cortisol at Year 2
-#Primary Outcome: Child LAZ at Year 2
-#Secondary Outcome: Child WAZ and head circumference-for-age Z score at Year 2
-#Tertiary Outcome: Child WLZ at Year 2
-
-##Hypothesis 2b
-#Residualized gain score for cortisol measured at Year 2 is positively associated 
-#with concurrent child LAZ, WAZ, WLZ, and head circumference-for-age Z score at Year 2.
-
-#Exposure: Quartiles of pre- and post-stressor cortisol at Year 2
-#Primary Outcome: Child LAZ at Year 2
-#Secondary Outcome: Child WAZ and head circumference-for-age Z score at Year 2
-#Tertiary Outcomes: Child WLZ at Year 2
-
-##Hypothesis 2c
-#Change in slope between pre- and post-stressor alpha-amylase measured at Year 2 is negatively associated 
-#with concurrent child LAZ, WAZ, WLZ, and head circumference-for-age Z score at Year 2.
-
-#Exposure: Quartiles of pre- and post-stressor alpha-amylase at Year 2
-#Primary Outcome: Child LAZ at Year 2
-#Secondary Outcome: Child WAZ and head circumference-for-age Z score at Year 2
-#Tertiary Outcome: Child WLZ at Year 2
-
-##Hypothesis 2d
-#Residualized gain score for alpha-amylase measured at Year 2 is negatively associated 
-#with concurrent child LAZ, WAZ, WLZ, and head circumference-for-age Z score at Year 2.
-
-#Exposure: Quartiles of pre- and post-stressor alpha-amylase at Year 2
-#Primary Outcome: Child LAZ at Year 2
-#Secondary Outcome: Child WAZ and head circumference-for-age Z score at Year 2
-#Tertiary Outcome: Child WLZ at Year 2
-
-Xvars <- c("t3_cort_slope", "t3_residual_cort", "t3_saa_slope", "t3_residual_saa")            
-Yvars <- c("laz_t3", "waz_t3", "whz_t3", "hcz_t3")
+Xvars <- c("preg_cort")            
+Yvars <- c("TS_t2_Z", "TS_t3_Z", "delta_TS_Z")
 
 #Fit models
 H2_models <- NULL
@@ -196,26 +106,10 @@ saveRDS(H2_plot_data, here("figure-data/H2_unadj_spline_data.RDS"))
 
 
 
-##Hypothesis 3a
-#Mean arterial pressure measured at Year 2 is negatively associated with concurrent 
-#child LAZ, WAZ, WLZ, and head circumference-for-age Z score at Year 2.
+##Hypothesis 3
 
-#Exposure: Quartiles of mean arterial pressure at Year 2
-#Primary Outcome: Child LAZ at Year 2
-#Secondary Outcome: Child WAZ and head circumference-for-age Z score at Year 2
-#Tertiary Outcomes: Child WLZ at Year 2
-
-##Hypothesis 3b
-#Resting heart rate measured at Year 2 is negatively associated with concurrent 
-#child LAZ, WAZ, WLZ, and head circumference-for-age Z score at Year 2.
-
-#Exposure: Quartiles of resting heart rate at Year 2
-#Primary Outcome: Child LAZ at Year 2
-#Secondary Outcome: Child WAZ and head circumference-for-age Z score at Year 2
-#Tertiary Outcomes: Child WLZ at Year 2
-
-Xvars <- c("t3_map", "t3_hr_mean")            
-Yvars <- c("laz_t3", "waz_t3", "whz_t3", "hcz_t3")
+Xvars <- c("logCRP", "logAGP", "ifng_mom_t0", "sumscore_t0_mom_Z")            
+Yvars <- c("TS_t2_Z", "TS_t3_Z", "delta_TS_Z")
 
 #Fit models
 H3_models <- NULL
@@ -260,26 +154,11 @@ saveRDS(H3_res, here("results/unadjusted/H3_res.RDS"))
 saveRDS(H3_plot_data, here("figure-data/H3_unadj_spline_data.RDS"))
 
 
-##Hypothesis 4a
-#Glucocorticoid receptor (NR3C1) exon 1F promoter methylation in saliva samples at Year 2 
-#is negatively associated with concurrent child LAZ, WAZ, WLZ, and head circumference-for-age Z score at Year 2.
-
-#Exposure: Quartiles of overall percentage of methylation across the entire promoter region at Year 2 post-intervention
-#Primary Outcome: Child LAZ at Year 2
-#Secondary Outcome: Child WAZ and head circumference-for-age Z score at Year 2
-#Tertiary Outcomes: Child WLZ at Year 2
-
-##Hypothesis 4b
-#Glucocorticoid receptor NGFI-A transcription factor binding site methylation in saliva samples at Year 2 
-#is negatively associated with concurrent child LAZ, WAZ, WLZ, and head circumference-for-age Z score at Year 2.
-
-#Exposure: Quartiles of percentage methylation at NGFI-A transcription factor binding 	site (CpG site #12)
-#Primary Outcome: Child LAZ at Year 2
-#Secondary Outcome: Child WAZ and head circumference-for-age Z score at Year 2
-#Tertiary Outcomes: Child WLZ at Year 2
+##Hypothesis 4
+# Maternal estriol is positively associated with child telomere length
                                                                                             
-Xvars <- c("t3_gcr_mean", "t3_gcr_cpg12")            
-Yvars <- c("laz_t3", "waz_t3", "whz_t3", "hcz_t3")
+Xvars <- c("preg_estri")            
+Yvars <- c("TS_t2_Z", "TS_t3_Z", "delta_TS_Z")
 
 #Fit models
 H4_models <- NULL

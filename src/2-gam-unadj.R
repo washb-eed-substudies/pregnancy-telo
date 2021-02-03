@@ -8,7 +8,8 @@ d<-readRDS(paste0(dropboxDir, "Data/Cleaned/Audrie/pregnancy_telo_covariates_dat
 
 ##Hypothesis 1
 #Maternal nutrition is positively associated with child telomere length
-Xvars <- c("vitD_nmol_per_L", "logFERR_inf", "logSTFR_inf", "logRBP_inf")            
+Xvars <- c("vitD_nmol_per_L", "logFERR_inf", "logSTFR_inf", "logRBP_inf", 
+           "vit_A_def", "iron_def", "vit_D_def")            
 Yvars <- c("TS_t2_Z", "TS_t3_Z", "delta_TS_Z")
 
 #Fit models
@@ -25,7 +26,11 @@ for(i in Xvars){
 H1_res <- NULL
 for(i in 1:nrow(H1_models)){
   res <- data.frame(X=H1_models$X[i], Y=H1_models$Y[i])
-  preds <- predict_gam_diff(fit=H1_models$fit[i][[1]], d=H1_models$dat[i][[1]], quantile_diff=c(0.25,0.75), Xvar=res$X, Yvar=res$Y)
+  if(grepl("_def", H1_models$X[i])){
+    preds <- predict_gam_diff(fit=H1_models$fit[i][[1]], d=H1_models$dat[i][[1]], quantile_diff=c(0.25,0.75), Xvar=res$X, Yvar=res$Y, binary=T)
+  }else{
+    preds <- predict_gam_diff(fit=H1_models$fit[i][[1]], d=H1_models$dat[i][[1]], quantile_diff=c(0.25,0.75), Xvar=res$X, Yvar=res$Y)
+  }
   H1_res <-  bind_rows(H1_res , preds$res)
 }
 

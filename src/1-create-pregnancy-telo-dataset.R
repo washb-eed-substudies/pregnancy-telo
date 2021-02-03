@@ -105,7 +105,13 @@ d <- d %>%
   mutate(delta_TS_Z = scale(delta_TS, center=TRUE, scale=TRUE)[,1])
 
 
-
+########### Add deficiency cutoff exposures #############
+# 1 if deficient, 0 if not deficient
+d$vit_A_def <- ifelse(d$RBP_inf_preg < 0.83, 1, 0)
+d$vit_D_def <- ifelse(d$vitD_nmol_per_L < 30, 1, 0)
+d$iron_def <- ifelse(d$FERR_inf_preg < 12 | d$STFR_inf_preg > 8.3, 1, 0)
+  
+  
 ############## Merge in hhwealth ##################
 d_hhwealth <- read.csv("C:/Users/Sophia/Documents/ee-secondary/sophia scripts/hhwealth.csv")
 d1 <- left_join(d, d_hhwealth, by="dataid")
@@ -156,6 +162,19 @@ levels(dfull$life_viol_any_t3)[length(levels(dfull$life_viol_any_t3))]<-"Missing
 dfull$viol_any_preg<-as.factor(dfull$viol_any_preg)
 dfull$viol_any_preg<-addNA(dfull$viol_any_preg)
 levels(dfull$viol_any_preg)[length(levels(dfull$viol_any_preg))]<-"Missing"
+
+#Z-score momheight and turn into a factor variable to avoid dropping
+#observations and to avoid sparse categories
+dfull <- dfull %>%
+  mutate(momheight = scale(momheight, center = TRUE, scale = TRUE),
+         momheight = cut(momheight, 
+                         c(min(momheight, na.rm = T), -2, -1, 0, 1, 2, max(momheight, na.rm = T)),
+                         right = FALSE,
+                         include.lowest = TRUE))
+summary(dfull$momheight)
+dfull$momheight<-addNA(dfull$momheight)
+levels(dfull$momheight)[length(levels(dfull$momheight))]<-"Missing"
+summary(dfull$momheight)
 
 for(outcome in out){
   d_sub <- subset(dfull, !is.na(dfull[,outcome]))

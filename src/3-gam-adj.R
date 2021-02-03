@@ -39,7 +39,8 @@ pick_covariates <- function(j){
 
 ##Hypothesis 1
 #Maternal nutrition is positively associated with child telomere length
-Xvars <- c("vitD_nmol_per_L", "logFERR_inf", "logSTFR_inf", "logRBP_inf")            
+Xvars <- c("vitD_nmol_per_L", "logFERR_inf", "logSTFR_inf", "logRBP_inf", 
+           "vit_A_def", "iron_def", "vit_D_def")          
 Yvars <- c("TS_t2_Z", "TS_t3_Z", "delta_TS_Z")
 
 #Fit models
@@ -61,7 +62,11 @@ for(i in Xvars){
 H1_adj_res <- NULL
 for(i in 1:nrow(H1_adj_models)){
   res <- data.frame(X=H1_adj_models$X[i], Y=H1_adj_models$Y[i])
-  preds <- predict_gam_diff(fit=H1_adj_models$fit[i][[1]], d=H1_adj_models$dat[i][[1]], quantile_diff=c(0.25,0.75), Xvar=res$X, Yvar=res$Y)
+  if(grepl("_def", H1_adj_models$X[i])){
+    preds <- predict_gam_diff(fit=H1_adj_models$fit[i][[1]], d=H1_adj_models$dat[i][[1]], quantile_diff=c(0.25,0.75), Xvar=res$X, Yvar=res$Y, binary=T)
+  }else{
+    preds <- predict_gam_diff(fit=H1_adj_models$fit[i][[1]], d=H1_adj_models$dat[i][[1]], quantile_diff=c(0.25,0.75), Xvar=res$X, Yvar=res$Y)
+  }
   H1_adj_res <-  bind_rows(H1_adj_res , preds$res)
 }
 
@@ -122,7 +127,6 @@ for(i in 1:nrow(H2_adj_models)){
 H2_adj_plot_list <- NULL
 H2_adj_plot_data <- NULL
 for(i in 1:nrow(H2_adj_models)){
-  print(i)
   res <- data.frame(X=H2_adj_models$X[i], Y=H2_adj_models$Y[i])
   simul_plot <- gam_simul_CI(H2_adj_models$fit[i][[1]], H2_adj_models$dat[i][[1]], xlab=res$X, ylab=res$Y, title="")
   H2_adj_plot_list[[i]] <-  simul_plot$p

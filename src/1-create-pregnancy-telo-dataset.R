@@ -163,19 +163,6 @@ dfull$viol_any_preg<-as.factor(dfull$viol_any_preg)
 dfull$viol_any_preg<-addNA(dfull$viol_any_preg)
 levels(dfull$viol_any_preg)[length(levels(dfull$viol_any_preg))]<-"Missing"
 
-#Z-score momheight and turn into a factor variable to avoid dropping
-#observations and to avoid sparse categories
-dfull <- dfull %>%
-  mutate(momheight = scale(momheight, center = TRUE, scale = TRUE),
-         momheight = cut(momheight, 
-                         c(min(momheight, na.rm = T), -2, -1, 0, 1, 2, max(momheight, na.rm = T)),
-                         right = FALSE,
-                         include.lowest = TRUE))
-summary(dfull$momheight)
-dfull$momheight<-addNA(dfull$momheight)
-levels(dfull$momheight)[length(levels(dfull$momheight))]<-"Missing"
-summary(dfull$momheight)
-
 for(outcome in out){
   d_sub <- subset(dfull, !is.na(dfull[,outcome]))
   W_sub <- d_sub %>% select(all_of(Wvars))  

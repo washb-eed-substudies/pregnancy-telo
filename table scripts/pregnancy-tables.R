@@ -2,7 +2,7 @@ rm(list=ls())
 
 library('flextable')
 library('officer')
-source(here::here("0-config.R"))
+# source(here::here("0-config.R"))
 
 # load enrollment characteristics and results
 # d <- read.csv(paste0(dropboxDir, "Data/Cleaned/Audrie/bangladesh-dm-ee-stress-growth-covariates-stresslab-anthro.csv"))
@@ -15,9 +15,11 @@ H2adj <- readRDS(here('results/adjusted/H2_adj_res.RDS'))
 H3adj <- readRDS(here('results/adjusted/H3_adj_res.RDS'))
 H4adj <- readRDS(here('results/adjusted/H4_adj_res.RDS'))
 
-
 #### Functions for growth tables ####
-growth_tbl <- function(name, expo_var, out_var, exposure, outcome, results, results_adj){
+
+pregnancy_tbl <- function(name, expo_var, out_var, exposure, outcome, H1, H1_adj){
+  
+
   ### name: string name of group of exposures
   ### expo_var: vector of string exposures to include in table
   ### out_var: vector of string outcomes to include in table
@@ -66,7 +68,7 @@ growth_tbl <- function(name, expo_var, out_var, exposure, outcome, results, resu
   tbl
 }
 
-growth_tbl_flex <- function(name, expo_var, out_var, exposure, outcome, results, results_adj){
+pregnancy_tbl_flex <- function(name, expo_var, out_var, exposure, outcome, results, results_adj){
   ### name: string name of group of exposures
   ### expo_var: vector of string exposures to include in table
   ### out_var: vector of string outcomes to include in table
@@ -184,114 +186,124 @@ growth_tbl_flex <- function(name, expo_var, out_var, exposure, outcome, results,
 
 #### Table 2 ####
 
-exposure <- c("t2_f2_8ip", "t2_f2_23d", "t2_f2_VI", "t2_f2_12i", "iso.pca")
-outcome <- c("laz_t2", "laz_t3", "len_velocity_t2_t3", "delta_laz_t2_t3")
-expo_var <- c("IPF(2a)-III", "2,3-dinor-iPF(2a)-III", "iPF(2a)-VI", "8,12-iso-iPF(2a)-VI", "Combined urinary oxidative stress biommarkers")
-out_var <- c("LAZ Year 1", "LAZ Year 2", "Length velocity Year 1 and Year 2", "Change in LAZ Year 1 to Year 2")
+exposure <- c("vitD_nmol_per_L", "logFERR_inf", "logSTFR_inf", "logRBP_inf", "vit_A_def", "iron_def", "vit_D_def")
+outcome <- c("TS_t2_Z", "TS_t3_Z", "delta_TS_Z")
+expo_var <- c("Vitamin D", "Ferritin", "sTfR", "RBP", "Vit A Deficiency", "Iron Deficiency", "Vitamin D Deficiency")
+out_var <- c("Telomeres Year 1", "Telomeres Year 2", "Telomere Change Year 1 and Year 2")
+results <- H1
+results_adj <- H1adj
 
-tbl2 <- growth_tbl("Urinary oxidative stress biomarker", expo_var, out_var, exposure, outcome, H1, H1adj)
-tbl2flex <- growth_tbl_flex("Urinary oxidative stress biomarker", expo_var, out_var, exposure, outcome, H1, H1adj)
+tbl2 <- pregnancy_tbl("Nutrition Biomarkers", expo_var, out_var, exposure, outcome, H1, H1adj)
+tbl2flex <- pregnancy_tbl_flex("Nutrition Biomarkers", expo_var, out_var, exposure, outcome, H1, H1adj)
 
 #### Table 3 ####
 
-exposure <- c("t3_cort_slope", "t3_residual_cort", "t3_saa_slope", "t3_residual_saa")
-outcome <- c("laz_t3")
-expo_var <- c("Pre to post-stress change in slope of cortisol", "Cortisol residualized gain score", "Pre to post-stress change in slope of sAA", "sAA residualized gain score")
-out_var <- c("LAZ Year 2")
+exposure <- c("preg_cort")
+outcome <- c("TS_t2_Z", "TS_t3_Z", "delta_TS_Z")
+expo_var <- c("Cortisol")
+out_var <- c("Telomeres Year 1", "Telomeres Year 2", "Telomere Change Year 1 and Year 2")
+results <- H2
+results_adj <- H2adj
 
-tbl3 <- growth_tbl("Salivary stress biomarker", expo_var, out_var, exposure, outcome, H2, H2adj)
-tbl3flex <- growth_tbl_flex("Salivary stress biomarker", expo_var, out_var, exposure, outcome, H2, H2adj)
+tbl3 <- pregnancy_tbl("Serum Stress Biomarker", expo_var, out_var, exposure, outcome, H2, H2adj)
+tbl3flex <- pregnancy_tbl_flex("Serum stress biomarker", expo_var, out_var, exposure, outcome, H2, H2adj)
 
 #### Table 4 ####
 
-exposure <- c("t3_map", "t3_hr_mean")
-outcome <- c("laz_t3")
-expo_var <- c("Mean arterial pressure", "Mean resting heart rate")
-out_var <- c("LAZ Year 2")
+exposure <- c("logCRP", "logAGP", "ifng_mom_t0", "sumscore_t0_mom_Z")
+outcome <- c("TS_t2_Z", "TS_t3_Z", "delta_TS_Z")
+expo_var <- c("CRP", "AGP", "IFNG", "Sum Score")
+out_var <- c("Telomeres Year 1", "Telomeres Year 2", "Telomere Change Year 1 and Year 2")
+results <- H3
+results_adj <- H3adj
 
-tbl4 <- growth_tbl("Resting SAM biomarker", expo_var, out_var, exposure, outcome, H3, H3adj)
-tbl4flex <- growth_tbl_flex("Resting SAM biomarker", expo_var, out_var, exposure, outcome, H3, H3adj)
+tbl4 <- pregnancy_tbl("Inflammation Biomarkers", expo_var, out_var, exposure, outcome, H3, H3adj)
+tbl4flex <- pregnancy_tbl_flex("Inflammation Biomarkers", expo_var, out_var, exposure, outcome, H3, H3adj)
 
 
 #### Table 5 ####
 
-exposure <- c("t3_gcr_mean", "t3_gcr_cpg12")
-outcome <- c("laz_t3")
-expo_var <- c("Entire promoter region (39 assayed CpG sites)", "NGFI-A transcription factor binding site (CpG site #12)")
-out_var <- c("LAZ Year 2")
+exposure <- c("preg_estri")
+outcome <- c("TS_t2_Z", "TS_t3_Z", "delta_TS_Z")
+expo_var <- c("Estriol")
+out_var <- c("Telomeres Year 1", "Telomeres Year 2", "Telomere Change Year 1 and Year 2")
+results <- H4
+results_adj <- H4adj
 
-tbl5 <- growth_tbl("Methylation site", expo_var, out_var, exposure, outcome, H4, H4adj)
-tbl5flex <- growth_tbl_flex("Methylation site", expo_var, out_var, exposure, outcome, H4, H4adj)
+tbl5 <- pregnancy_tbl("Estriol", expo_var, out_var, exposure, outcome, H4, H4adj)
+tbl5flex <- pregnancy_tbl_flex("Estriol", expo_var, out_var, exposure, outcome, H4, H4adj)
 
 
 #### Supplementary Tables ####
 #### Table S1 ####
 
-exposure <- c("t2_f2_8ip", "t2_f2_23d", "t2_f2_VI", "t2_f2_12i", "iso.pca")
-outcome <- c("waz_t2", "whz_t2", "hcz_t2", "waz_t3", "whz_t3", "hcz_t3",
-             "wei_velocity_t2_t3", "hc_velocity_t2_t3",
-             "delta_waz_t2_t3", "delta_whz_t2_t3", "delta_hcz_t2_t3")
-expo_var <- c("IPF(2a)-III", "2,3-dinor-iPF(2a)-III", "iPF(2a)-VI", "8,12-iso-iPF(2a)-VI", "Combined urinary oxidative stress biommarkers")
-out_var <- c("WAZ Year 1", "WLZ Year 1", "HCZ Year 1",
-             "WAZ Year 2", "WLZ Year 2", "HCZ Year 2",
-             "Weight velocity (kg/month) Year 1 to Year 2",
-             "Head circumference velocity (cm/month) Year 1 to Year 2",
-             "Change in child WAZ from Year 1 to Year 2",
-             "Change in WLZ from Year 1 to Year 2",
-             "Change in HCZ from Year 1 to Year 2")
+# exposure <- c("t2_f2_8ip", "t2_f2_23d", "t2_f2_VI", "t2_f2_12i", "iso.pca")
+# outcome <- c("waz_t2", "whz_t2", "hcz_t2", "waz_t3", "whz_t3", "hcz_t3",
+           #  "wei_velocity_t2_t3", "hc_velocity_t2_t3",
+           #  "delta_waz_t2_t3", "delta_whz_t2_t3", "delta_hcz_t2_t3")
+# expo_var <- c("IPF(2a)-III", "2,3-dinor-iPF(2a)-III", "iPF(2a)-VI", "8,12-iso-iPF(2a)-VI", "Combined urinary oxidative stress biommarkers")
+# out_var <- c("WAZ Year 1", "WLZ Year 1", "HCZ Year 1",
+          #   "WAZ Year 2", "WLZ Year 2", "HCZ Year 2",
+          #  "Weight velocity (kg/month) Year 1 to Year 2",
+          # "Head circumference velocity (cm/month) Year 1 to Year 2",
+          #   "Change in child WAZ from Year 1 to Year 2",
+          #   "Change in WLZ from Year 1 to Year 2",
+          #   "Change in HCZ from Year 1 to Year 2")
 
-tbls1 <- growth_tbl("Urinary oxidative stress biomarker", expo_var, out_var, exposure, outcome, H1, H1adj)
-tbls1flex <- growth_tbl_flex("Urinary oxidative stress biomarker", expo_var, out_var, exposure, outcome, H1, H1adj)
+# tbls1 <- growth_tbl("Urinary oxidative stress biomarker", expo_var, out_var, exposure, outcome, H1, H1adj)
+# tbls1flex <- growth_tbl_flex("Urinary oxidative stress biomarker", expo_var, out_var, exposure, outcome, H1, H1adj)
 
 
 #### Table S2 ####
 
-exposure <- c("t3_cort_slope", "t3_residual_cort", "t3_saa_slope", "t3_residual_saa")
-outcome <- c("waz_t3", "whz_t3", "hcz_t3")
-expo_var <- c("Pre to post-stress change in slope of cortisol", "Cortisol residualized gain score", "Pre to post-stress change in slope of sAA", "sAA residualized gain score")
-out_var <- c("WAZ Year 2", "WLZ Year 2", "HCZ Year 2")
+# exposure <- c("t3_cort_slope", "t3_residual_cort", "t3_saa_slope", "t3_residual_saa")
+# outcome <- c("waz_t3", "whz_t3", "hcz_t3")
+# expo_var <- c("Pre to post-stress change in slope of cortisol", "Cortisol residualized gain score", "Pre to post-stress change in slope of sAA", "sAA residualized gain score")
+# out_var <- c("WAZ Year 2", "WLZ Year 2", "HCZ Year 2")
 
-tbls2 <- growth_tbl("Salivary stress biomarker", expo_var, out_var, exposure, outcome, H2, H2adj)
-tbls2flex <- growth_tbl_flex("Salivary stress biomarker", expo_var, out_var, exposure, outcome, H2, H2adj)
+# tbls2 <- growth_tbl("Salivary stress biomarker", expo_var, out_var, exposure, outcome, H2, H2adj)
+# tbls2flex <- growth_tbl_flex("Salivary stress biomarker", expo_var, out_var, exposure, outcome, H2, H2adj)
 
 
 #### Table S3 ####
 
-exposure <- c("t3_map", "t3_hr_mean")
-outcome <- c("waz_t3", "whz_t3", "hcz_t3")
-expo_var <- c("Mean arterial pressure", "Mean resting heart rate")
-out_var <- c("WAZ Year 2", "WLZ Year 2", "HCZ Year 2")
+# exposure <- c("t3_map", "t3_hr_mean")
+# outcome <- c("waz_t3", "whz_t3", "hcz_t3")
+# expo_var <- c("Mean arterial pressure", "Mean resting heart rate")
+# out_var <- c("WAZ Year 2", "WLZ Year 2", "HCZ Year 2")
 
-tbls3 <- growth_tbl("Resting SAM biomarker", expo_var, out_var, exposure, outcome, H3, H3adj)
-tbls3flex <- growth_tbl_flex("Resting SAM biomarker", expo_var, out_var, exposure, outcome, H3, H3adj)
+# tbls3 <- growth_tbl("Resting SAM biomarker", expo_var, out_var, exposure, outcome, H3, H3adj)
+# tbls3flex <- growth_tbl_flex("Resting SAM biomarker", expo_var, out_var, exposure, outcome, H3, H3adj)
 
 
 
 #### Table S4 ####
 
-exposure <- c("t3_gcr_mean", "t3_gcr_cpg12")
-outcome <- c("waz_t3", "whz_t3", "hcz_t3")
-expo_var <- c("Entire promoter region (39 assayed CpG sites)", "NGFI-A transcription factor binding site (CpG site #12)")
-out_var <- c("WAZ Year 2", "WLZ Year 2", "HCZ Year 2")
+# exposure <- c("t3_gcr_mean", "t3_gcr_cpg12")
+# outcome <- c("waz_t3", "whz_t3", "hcz_t3")
+# expo_var <- c("Entire promoter region (39 assayed CpG sites)", "NGFI-A transcription factor binding site (CpG site #12)")
+# out_var <- c("WAZ Year 2", "WLZ Year 2", "HCZ Year 2")
 
-tbls4 <- growth_tbl("Methylation site", expo_var, out_var, exposure, outcome, H4, H4adj)
-tbls4flex <- growth_tbl_flex("Methylation site", expo_var, out_var, exposure, outcome, H4, H4adj)
+# tbls4 <- growth_tbl("Methylation site", expo_var, out_var, exposure, outcome, H4, H4adj)
+# tbls4flex <- growth_tbl_flex("Methylation site", expo_var, out_var, exposure, outcome, H4, H4adj)
 
 
 #### SAVE TABLES ####
 
-write.csv(tbl1, file=here("tables/main/stress-growth-table1.csv"))
-write.csv(tbl2, here('tables/main/stress-growth-table2.csv'))
-write.csv(tbl3, here('tables/main/stress-growth-table3.csv'))
-write.csv(tbl4, here('tables/main/stress-growth-table4.csv'))
-write.csv(tbl5, here('tables/main/stress-growth-table5.csv'))
+# write.csv(tbl1, file=here("tables/main/pregnancy-telo-table1.csv"))
+write.csv(tbl2, here('tables/pregnancy-telo-table1.csv'))
+write.csv(tbl3, here('tables/pregnancy-telo-table2.csv'))
+write.csv(tbl4, here('tables/pregnancy-telo-table3.csv'))
+write.csv(tbl5, here('tables/pregnancy-telo-table4.csv'))
 
-save_as_docx("Table 1" = tbl1flex, "Table 2" = tbl2flex, "Table 3" = tbl3flex, "Table 4" = tbl4flex, "Table 5" = tbl5flex, path='C:/Users/Sophia/Documents/WASH/WASH Stress and Growth/stress-growth main.docx')
+save_as_docx("Table 2" = tbl2flex, "Table 3" = tbl3flex, "Table 4" = tbl4flex, "Table 5" = tbl5flex, path='~/Desktop/pregnancy-telo/tables/tables.docx')
 
-write.csv(tbls1, here('tables/supplementary/stress-growth-tables1.csv'))
-write.csv(tbls2, here('tables/supplementary/stress-growth-tables2.csv'))
-write.csv(tbls3, here('tables/supplementary/stress-growth-tables3.csv'))
-write.csv(tbls4, here('tables/supplementary/stress-growth-tables4.csv'))
+## "preg-telo tables.docx" is easier to read than "tables.docx"
 
-save_as_docx("Table S1" = tbls1flex, "Table S2" = tbls2flex, "Table S3" = tbls3flex, "Table S4" = tbls4flex, path='C:/Users/Sophia/Documents/WASH/WASH Stress and Growth/stress-growth supplementary.docx')
+# write.csv(tbls1, here('tables/supplementary/stress-growth-tables1.csv'))
+# write.csv(tbls2, here('tables/supplementary/stress-growth-tables2.csv'))
+# write.csv(tbls3, here('tables/supplementary/stress-growth-tables3.csv'))
+# write.csv(tbls4, here('tables/supplementary/stress-growth-tables4.csv'))
+
+# save_as_docx("Table S1" = tbls1flex, "Table S2" = tbls2flex, "Table S3" = tbls3flex, "Table S4" = tbls4flex, path='C:/Users/Sophia/Documents/WASH/WASH Stress and Growth/stress-growth supplementary.docx')
 

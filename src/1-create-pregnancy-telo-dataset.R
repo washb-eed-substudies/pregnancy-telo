@@ -5,8 +5,7 @@ rm(list=ls())
 
 source(here::here("0-config.R"))
 
-
-d<-read.csv(paste0(dropboxDir, "Data/Cleaned/Audrie/washb-bd-pregnancy-serum-micronutrient-immun-cortisol-covariates-telo.csv"))
+d<-read.csv(paste0(dropboxDir, "Data/Cleaned/Audrie/washb-bd-pregnancy-serum-micronutrient-immun-cortisol-covariates-telo (1).csv"))
 names(d)
 
 summary(d$mom_t0_ln_il2)
@@ -125,7 +124,7 @@ dfull <- left_join(d1, d_sum, by="dataid")
 
 ############# Check covariate missingness ###################
 exp <- c("vitD_nmol_per_L", "logFERR_inf", "logSTFR_inf", "logRBP_inf",
-         "preg_cort", "logCRP", "logAGP", "ifng_mom_t0", "sumscore_t0_mom_Z", "preg_cort")
+         "ln_preg_cort", "logCRP", "logAGP", "ifng_mom_t0", "sumscore_t0_mom_Z", "ln_preg_estri")
 out <- c("TS_t2_Z", "TS_t3_Z", "delta_TS_Z")
 
 Wvars<-c("sex","birthord", "momage","momheight","momedu", 

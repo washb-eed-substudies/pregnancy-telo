@@ -64,7 +64,7 @@ saveRDS(H1_plot_data, here("figure-data/H1_unadj_spline_data.RDS"))
 # Maternal stress is negatively associated with child telomere length and postively correlated with
 # change in telomere length
 
-Xvars <- c("preg_cort")            
+Xvars <- c("ln_preg_cort")            
 Yvars <- c("TS_t2_Z", "TS_t3_Z", "delta_TS_Z")
 
 #Fit models
@@ -162,7 +162,7 @@ saveRDS(H3_plot_data, here("figure-data/H3_unadj_spline_data.RDS"))
 ##Hypothesis 4
 # Maternal estriol is positively associated with child telomere length
                                                                                             
-Xvars <- c("preg_estri")            
+Xvars <- c("ln_preg_estri")            
 Yvars <- c("TS_t2_Z", "TS_t3_Z", "delta_TS_Z")
 
 #Fit models

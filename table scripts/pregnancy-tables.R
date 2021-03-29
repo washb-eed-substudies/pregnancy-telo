@@ -2,6 +2,8 @@ rm(list=ls())
 
 library('flextable')
 library('officer')
+library('here')
+source(here("table-functions.R"))
 # source(here::here("0-config.R"))
 
 # load enrollment characteristics and results
@@ -15,209 +17,6 @@ H2adj <- readRDS(here('results/adjusted/H2_adj_res.RDS'))
 H3adj <- readRDS(here('results/adjusted/H3_adj_res.RDS'))
 H4adj <- readRDS(here('results/adjusted/H4_adj_res.RDS'))
 
-#### Functions for growth tables ####
-
-pregnancy_tbl <- function(name, expo_var, out_var, exposure, outcome, H1, H1_adj)
-  
-
-  ### name: string name of group of exposures
-  ### expo_var: vector of string exposures to include in table
-  ### out_var: vector of string outcomes to include in table
-  ### exposure: vector of string exposure variable names
-  ### outcome: vector of string outcome variable names
-  ### results: data frame with unadjusted results
-  ### results_adj: data fram with adjusted results
-  
-  #### Functions for gam tables ####
-  pregnancy_tbl <- function(name, expo_var, out_var, exposure, outcome, results, results_adj, adj_only=F){
-    ### name: string name of group of exposures
-    ### expo_var: vector of string exposures to include in table
-    ### out_var: vector of string outcomes to include in table
-    ### exposure: vector of string exposure variable names
-    ### outcome: vector of string outcome variable names
-    ### results: data frame with unadjusted results
-    ### results_adj: data frame with adjusted results
-    ### adj_only: T or F if T will produce table with only the adjusted results, otherwise will display all results together
-    
-    ### this function produces a table that can be saved as a csv
-    if(adj_only){
-      tbl <- data.table(name = character(), "Outcome" = character(), "N" = character(), "25th Percentile" = character(), "75th Percentile" = character(),
-                        "Outcome, 75th Percentile v. 25th Percentile" = character(),
-                        " " = character(), " " = character(), " " = character(), " " = character())
-      tbl <- rbind(tbl, list(" ", " ", " ", " ", " ", "Adjusted", " ", " ", " ", " "))
-      tbl <- rbind(tbl, list(" ", " ", " ", " ", " ", 
-                             "Predicted Outcome at 25th Percentile", "Predicted Outcome at 75th Percentile", "Coefficient (95% CI)", "P-value", "FDR adjusted P-value"))
-      skipped<-F
-      for (i in 1:length(exposure)) {
-        for (j in 1:length(outcome)) {
-          exp <- exposure[i]
-          out <- outcome[j]
-          filtered_adj <- results_adj[results_adj$Y==out & results_adj$X==exp,]
-          adj <- paste(round(filtered_adj$`point.diff`, 2), " (", round(filtered_adj$`lb.diff`, 2), ", ", round(filtered_adj$`ub.diff`, 2), ")", sep="")
-          if (nrow(filtered_adj)==0){
-            skipped<-T
-            next
-          }
-          if(j==1|skipped==T){
-            tbl <- rbind(tbl, list(expo_var[i], out_var[j], filtered_adj$N, round(filtered_adj$q1, 2), round(filtered_adj$q3, 2), 
-                                   round(filtered_adj$pred.q1, 2), round(filtered_adj$pred.q3, 2), adj, round(filtered_adj$Pval, 2), round(filtered_adj$BH.Pval, 2)))
-            skipped<-F
-          }else {
-            tbl <- rbind(tbl, list("", out_var[j],  filtered_adj$N, round(filtered_adj$q1, 2), round(filtered_adj$q3, 2), 
-                                   round(filtered_adj$pred.q1, 2), round(filtered_adj$pred.q3, 2), adj, round(filtered_adj$Pval, 2), round(filtered_adj$BH.Pval, 2)))
-          }
-        }
-        if (i != length(exposure)) {
-          tbl <- rbind(tbl, list("","","","","","","","","",""))
-        }
-      }
-    }else{
-      tbl <- data.table(name = character(), "Outcome" = character(), "N" = character(), "25th Percentile" = character(), "75th Percentile" = character(),
-                        " Outcome, 75th Percentile v. 25th Percentile" = character(), " " = character(), " " = character(), " " = character(), " " = character(),
-                        " " = character(), " " = character(), " " = character(), " " = character(), " " = character())
-      tbl <- rbind(tbl, list(" ", " ", " ", " ", " ", "Unadjusted", " ", " ", " ", " ", "Adjusted", " ", " ", " ", " "))
-      tbl <- rbind(tbl, list(" ", " ", " ", " ", " ", 
-                             "Predicted Outcome at 25th Percentile", "Predicted Outcome at 75th Percentile", "Coefficient (95% CI)", "P-value", "FDR adjusted P-value", 
-                             "Predicted Outcome at 25th Percentile", "Predicted Outcome at 75th Percentile", "Coefficient (95% CI)", "P-value", "FDR adjusted P-value"))
-      skipped<-F
-      for (i in 1:length(exposure)) {
-        for (j in 1:length(outcome)) {
-          exp <- exposure[i]
-          out <- outcome[j]
-          filtered_res <- results[results$Y==out & results$X==exp,]
-          filtered_adj <- results_adj[results_adj$Y==out & results_adj$X==exp,]
-          unadj <- paste(round(filtered_res$`point.diff`, 2), " (", round(filtered_res$`lb.diff`, 2), ", ", round(filtered_res$`ub.diff`, 2), ")", sep="")
-          adj <- paste(round(filtered_adj$`point.diff`, 2), " (", round(filtered_adj$`lb.diff`, 2), ", ", round(filtered_adj$`ub.diff`, 2), ")", sep="")
-          if (nrow(filtered_res)==0){
-            skipped<-T
-            next
-          }
-          if(j==1|skipped==T){
-            tbl <- rbind(tbl, list(expo_var[i], out_var[j], filtered_res$N, round(filtered_res$q1, 2), round(filtered_res$q3, 2), 
-                                   round(filtered_res$pred.q1, 2), round(filtered_res$pred.q3, 2), unadj, round(filtered_res$Pval, 2), round(filtered_res$BH.Pval, 2), 
-                                   round(filtered_adj$pred.q1, 2), round(filtered_adj$pred.q3, 2), adj, round(filtered_adj$Pval, 2), round(filtered_adj$BH.Pval, 2)))
-            skipped<-F
-          }else {
-            tbl <- rbind(tbl, list("", out_var[j],  filtered_res$N, round(filtered_res$q1, 2), round(filtered_res$q3, 2), 
-                                   round(filtered_res$pred.q1, 2), round(filtered_res$pred.q3, 2), unadj, round(filtered_res$Pval, 2), round(filtered_res$BH.Pval, 2), 
-                                   round(filtered_adj$pred.q1, 2), round(filtered_adj$pred.q3, 2), adj, round(filtered_adj$Pval, 2), round(filtered_adj$BH.Pval, 2)))
-          }
-        }
-        if (i != length(exposure)) {
-          tbl <- rbind(tbl, list("","","","","","","","","","","","","","",""))
-        }
-      }
-    }
-    tbl
-  }
-  
-  pregnancy_tbl_flex <- function(name, expo_var, out_var, exposure, outcome, results, results_adj, adj_only=F){
-    ### name: string name of group of exposures
-    ### expo_var: vector of string exposures to include in table
-    ### out_var: vector of string outcomes to include in table
-    ### exposure: vector of string exposure variable names
-    ### outcome: vector of string outcome variable names
-    ### results: data frame with unadjusted results
-    ### results_adj: data fram with adjusted results
-    ### adj_only: T or F if T will produce table with only the adjusted results, otherwise will display all results together
-    
-    ### this function produces a table that can be saved as an image or 
-    ### directly to a word document!
-    
-    # build table
-    if(adj_only){
-      tbl <- data.table(matrix(nrow=0, ncol=10))
-      skipped<-F
-      for (i in 1:length(exposure)) {
-        for (j in 1:length(outcome)) {
-          exp <- exposure[i]
-          out <- outcome[j]
-          filtered_adj <- results_adj[results_adj$Y==out & results_adj$X==exp,]
-          adj <- paste(round(filtered_adj$`point.diff`, 2), " (", round(filtered_adj$`lb.diff`, 2), ", ", round(filtered_adj$`ub.diff`, 2), ")", sep="")
-          if (nrow(filtered_adj)==0){
-            skipped<-T
-            next
-          }
-          if(j==1|skipped==T){
-            tbl <- rbind(tbl, list(expo_var[i], out_var[j],  filtered_adj$N, round(filtered_adj$q1, 2), round(filtered_adj$q3, 2), 
-                                   round(filtered_adj$pred.q1, 2), round(filtered_adj$pred.q3, 2), adj, round(filtered_adj$Pval, 2), round(filtered_adj$BH.Pval, 2)))
-            skipped=F
-          }else {
-            tbl <- rbind(tbl, list(" ", out_var[j],  filtered_adj$N, round(filtered_adj$q1, 2), round(filtered_adj$q3, 2), 
-                                   round(filtered_adj$pred.q1, 2), round(filtered_adj$pred.q3, 2), adj, round(filtered_adj$Pval, 2), round(filtered_adj$BH.Pval, 2)))
-          }
-        }
-        if (i != length(exposure)) {
-          tbl <- rbind(tbl, list("","","","","","","","","",""))
-        }
-      }
-      flextbl<-flextable(tbl, col_keys=names(tbl))
-      flextbl <- set_header_labels(flextbl,
-                                   values = list("V1" = " ", "V2" = " ", "V3" = " ", "V4" = " ", "V5" = " ",
-                                                 "V6" = "Predicted Outcome at 25th Percentile", "V7" = "Predicted Outcome at 75th Percentile", 
-                                                 "V8" = "Coefficient (95% CI)", "V9" = "P-value", "V10" = "FDR Corrected P-value"))
-      flextbl <- add_header_row(flextbl, values = c("","","","","", "Adjusted"), colwidths=c(1,1,1,1,1,5))
-      flextbl <- add_header_row(flextbl, values = c(name, "Outcome","N","25th Percentile","75th Percentile", "Outcome, 75th Percentile v. 25th Percentile"), colwidths=c(1,1,1,1,1,5))
-      
-    }else{
-      tbl <- data.table(matrix(nrow=0, ncol=15))
-      skipped<-F
-      for (i in 1:length(exposure)) {
-        for (j in 1:length(outcome)) {
-          exp <- exposure[i]
-          out <- outcome[j]
-          filtered_res <- results[results$Y==out & results$X==exp,]
-          filtered_adj <- results_adj[results_adj$Y==out & results_adj$X==exp,]
-          unadj <- paste(round(filtered_res$`point.diff`, 2), " (", round(filtered_res$`lb.diff`, 2), ", ", round(filtered_res$`ub.diff`, 2), ")", sep="")
-          adj <- paste(round(filtered_adj$`point.diff`, 2), " (", round(filtered_adj$`lb.diff`, 2), ", ", round(filtered_adj$`ub.diff`, 2), ")", sep="")
-          if (nrow(filtered_res)==0){
-            skipped<-T
-            next
-          }
-          if(j==1|skipped==T){
-            tbl <- rbind(tbl, list(expo_var[i], out_var[j],  filtered_res$N, round(filtered_res$q1, 2), round(filtered_res$q3, 2), 
-                                   round(filtered_res$pred.q1, 2), round(filtered_res$pred.q3, 2), unadj, round(filtered_res$Pval, 2), round(filtered_res$BH.Pval, 2), 
-                                   round(filtered_adj$pred.q1, 2), round(filtered_adj$pred.q3, 2), adj, round(filtered_adj$Pval, 2), round(filtered_adj$BH.Pval, 2)))
-            skipped=F
-          }else {
-            tbl <- rbind(tbl, list(" ", out_var[j],  filtered_res$N, round(filtered_res$q1, 2), round(filtered_res$q3, 2), 
-                                   round(filtered_res$pred.q1, 2), round(filtered_res$pred.q3, 2), unadj, round(filtered_res$Pval, 2), round(filtered_res$BH.Pval, 2), 
-                                   round(filtered_adj$pred.q1, 2), round(filtered_adj$pred.q3, 2), adj, round(filtered_adj$Pval, 2), round(filtered_adj$BH.Pval, 2)))
-          }
-        }
-        if (i != length(exposure)) {
-          tbl <- rbind(tbl, list("","","","","","","","", "","","","","","",""))
-        }
-      }
-      
-      flextbl<-flextable(tbl, col_keys=names(tbl))
-      flextbl <- set_header_labels(flextbl,
-                                   values = list("V1" = " ", "V2" = " ", "V3" = " ", "V4" = " ", "V5" = " ",
-                                                 "V6" = "Predicted Outcome at 25th Percentile", "V7" = "Predicted Outcome at 75th Percentile", "V8" = "Coefficient (95% CI)", "V9" = "P-value", "V10" = "FDR Corrected P-value",
-                                                 "V11" = "Predicted Outcome at 25th Percentile", "V12" = "Predicted Outcome at 75th Percentile", "V13" = "Coefficient (95% CI)", "V14" = "P-value", "V15" = "FDR Corrected P-value"))
-      flextbl <- add_header_row(flextbl, values = c("","","","","", "Unadjusted", "Adjusted"), colwidths=c(1,1,1,1,1,5,5))
-      flextbl <- add_header_row(flextbl, values = c(name, "Outcome","N","25th Percentile","75th Percentile", "Outcome, 75th Percentile v. 25th Percentile"), colwidths=c(1,1,1,1,1,10))
-    }
-    flextbl <- hline(flextbl, part="header", border=fp_border(color="black"))
-    flextbl <- hline_bottom(flextbl, part="body", border=fp_border(color="black"))
-    flextbl <- hline_top(flextbl, part="header", border=fp_border(color="black"))
-    flextbl <- align(flextbl, align = "center", part = "all")
-    flextbl <- align(flextbl, j = c(1, 2), align = "left", part="all")
-    flextbl <- autofit(flextbl, part = "all")
-    flextbl <- fit_to_width(flextbl, max_width=8)
-    
-    if(adj_only){
-      flextbl <- add_footer_row(flextbl, top=F, 
-                                values = "N, 25th Percentile, and 75th Percentile are from the adjusted analyses", colwidths = 10)
-    }else{
-      flextbl <- add_footer_row(flextbl, top=F, 
-                                values = "N, 25th Percentile, and 75th Percentile are from the unadjusted analyses", colwidths = 15)
-    }
-    
-    flextbl
-  }
-  
-  
 
 #### MAIN TABLES ####
 #### Table 1 ####
@@ -279,10 +78,10 @@ out_var <- c("Telomeres Year 1", "Telomeres Year 2", "Telomere Change Year 1 and
 results <- H1
 results_adj <- H1adj
 
-tbl2 <- pregnancy_tbl("Nutrition Biomarkers", expo_var, out_var, exposure, outcome, H1, H1adj)
-tbl2flex <- pregnancy_tbl_flex("Nutrition Biomarkers", expo_var, out_var, exposure, outcome, H1, H1adj)
-tbl2supp <- pregnancy_tbl("Nutrition Biomarkers", expo_var, out_var, exposure, outcome, H1, H1adj)
-tbl2flexsupp <- pregnancy_tbl_flex("Nutrition Biomarkers", expo_var, out_var, exposure, outcome, H1, H1adj)
+tbl2 <- growth_tbl("Nutrition Biomarkers", expo_var, out_var, exposure, outcome, H1, H1adj, T)
+tbl2flex <- growth_tbl_flex("Nutrition Biomarkers", expo_var, out_var, exposure, outcome, H1, H1adj, T)
+tbl2supp <- growth_tbl("Nutrition Biomarkers", expo_var, out_var, exposure, outcome, H1, H1adj)
+tbl2flexsupp <- growth_tbl_flex("Nutrition Biomarkers", expo_var, out_var, exposure, outcome, H1, H1adj)
 
 #### Table 3 ####
 
@@ -293,10 +92,10 @@ out_var <- c("Telomeres Year 1", "Telomeres Year 2", "Telomere Change Year 1 and
 results <- H2
 results_adj <- H2adj
 
-tbl3 <- pregnancy_tbl("Serum Stress Biomarker", expo_var, out_var, exposure, outcome, H2, H2adj)
-tbl3flex <- pregnancy_tbl_flex("Serum stress biomarker", expo_var, out_var, exposure, outcome, H2, H2adj)
-tbl3supp <- pregnancy_tbl("Serum Stress Biomarker", expo_var, out_var, exposure, outcome, H2, H2adj)
-tbl3flexsupp <- pregnancy_tbl_flex("Serum Stress Biomarker", expo_var, out_var, exposure, outcome, H2, H2adj)
+tbl3 <- growth_tbl("Serum Stress Biomarker", expo_var, out_var, exposure, outcome, H2, H2adj, T)
+tbl3flex <- growth_tbl_flex("Serum stress biomarker", expo_var, out_var, exposure, outcome, H2, H2adj, T)
+tbl3supp <- growth_tbl("Serum Stress Biomarker", expo_var, out_var, exposure, outcome, H2, H2adj)
+tbl3flexsupp <- growth_tbl_flex("Serum Stress Biomarker", expo_var, out_var, exposure, outcome, H2, H2adj)
 
 
 #### Table 4 ####
@@ -308,10 +107,10 @@ out_var <- c("Telomeres Year 1", "Telomeres Year 2", "Telomere Change Year 1 and
 results <- H3
 results_adj <- H3adj
 
-tbl4 <- pregnancy_tbl("Inflammation Biomarkers", expo_var, out_var, exposure, outcome, H3, H3adj)
-tbl4flex <- pregnancy_tbl_flex("Inflammation Biomarkers", expo_var, out_var, exposure, outcome, H3, H3adj)
-tbl4supp <- pregnancy_tbl("Inflammation Biomarkers", expo_var, out_var, exposure, outcome, H3, H3adj)
-tbl4flexsupp <- pregnancy_tbl_flex("Inflammation Biomarkers", expo_var, out_var, exposure, outcome, H3, H3adj)
+tbl4 <- growth_tbl("Inflammation Biomarkers", expo_var, out_var, exposure, outcome, H3, H3adj, T)
+tbl4flex <- growth_tbl_flex("Inflammation Biomarkers", expo_var, out_var, exposure, outcome, H3, H3adj, T)
+tbl4supp <- growth_tbl("Inflammation Biomarkers", expo_var, out_var, exposure, outcome, H3, H3adj)
+tbl4flexsupp <- growth_tbl_flex("Inflammation Biomarkers", expo_var, out_var, exposure, outcome, H3, H3adj)
 
 #### Table 5 ####
 
@@ -322,10 +121,10 @@ out_var <- c("Telomeres Year 1", "Telomeres Year 2", "Telomere Change Year 1 and
 results <- H4
 results_adj <- H4adj
 
-tbl5 <- pregnancy_tbl("Estriol", expo_var, out_var, exposure, outcome, H4, H4adj)
-tbl5flex <- pregnancy_tbl_flex("Estriol", expo_var, out_var, exposure, outcome, H4, H4adj)
-tbl5supp <- pregnancy_tbl("Estriol", expo_var, out_var, exposure, outcome, H4, H4adj)
-tbl5flexsupp <- pregnancy_tbl_flex("Estriol", expo_var, out_var, exposure, outcome, H4, H4adj)
+tbl5 <- growth_tbl("Estriol", expo_var, out_var, exposure, outcome, H4, H4adj, T)
+tbl5flex <- growth_tbl_flex("Estriol", expo_var, out_var, exposure, outcome, H4, H4adj, T)
+tbl5supp <- growth_tbl("Estriol", expo_var, out_var, exposure, outcome, H4, H4adj)
+tbl5flexsupp <- growth_tbl_flex("Estriol", expo_var, out_var, exposure, outcome, H4, H4adj)
 
 #### Supplementary Tables ####
 #### Table S1 ####
@@ -393,9 +192,9 @@ write.csv(tbl4supp, here('tables/pregnancy-telo-table3-supp.csv'))
 write.csv(tbl5, here('tables/pregnancy-telo-table4.csv'))
 write.csv(tbl5supp, here('tables/pregnancy-telo-table4-supp.csv'))
 
-save_as_docx("Table 2" = tbl2flex, "Table 3" = tbl3flex, "Table 4" = tbl4flex, "Table 5" = tbl5flex,path='~/Desktop/pregnancy-telo/tables/maintables.docx')
+save_as_docx("Table 1" = tbl2flex, "Table 2" = tbl3flex, "Table 3" = tbl4flex, "Table 4" = tbl5flex,path='~/Desktop/pregnancy-telo/tables/maintables.docx')
 
-save_as_docx("Table S2" = tbl2flexsupp, "Table S3" = tbl3flexsupp, "Table S4" = tbl4flexsupp, "Table S5" = tbl5flexsupp ,path='~/Desktop/pregnancy-telo/tables/supptables.docx')
+save_as_docx("Table S1" = tbl2flexsupp, "Table S2" = tbl3flexsupp, "Table S3" = tbl4flexsupp, "Table S4" = tbl5flexsupp ,path='~/Desktop/pregnancy-telo/tables/supptables.docx')
 
 # write.csv(tbls1, here('tables/supplementary/stress-growth-tables1.csv'))
 # write.csv(tbls2, here('tables/supplementary/stress-growth-tables2.csv'))

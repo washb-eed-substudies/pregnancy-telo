@@ -4,7 +4,7 @@ library('flextable')
 library('officer')
 library('here')
 source(here("table-functions.R"))
-# source(here::here("0-config.R"))
+source(here::here("0-config.R"))
 
 # load enrollment characteristics and results
 # d <- read.csv(paste0(dropboxDir, "Data/Cleaned/Audrie/bangladesh-dm-ee-stress-growth-covariates-stresslab-anthro.csv"))
@@ -78,18 +78,10 @@ out_var <- c("Telomeres Year 1", "Telomeres Year 2", "Telomere Change Year 1 and
 results <- H1
 results_adj <- H1adj
 
-<<<<<<< HEAD
-tbl2 <- pregnancy_tbl("Nutrition Biomarkers", expo_var, out_var, exposure, outcome, H1, H1adj)
-tbl2
-tbl2flex <- pregnancy_tbl_flex("Nutrition Biomarkers", expo_var, out_var, exposure, outcome, H1, H1adj)
-tbl2supp <- pregnancy_tbl("Nutrition Biomarkers", expo_var, out_var, exposure, outcome, H1, H1adj)
-tbl2flexsupp <- pregnancy_tbl_flex("Nutrition Biomarkers", expo_var, out_var, exposure, outcome, H1, H1adj)
-=======
 tbl2 <- growth_tbl("Nutrition Biomarkers", expo_var, out_var, exposure, outcome, H1, H1adj, T)
 tbl2flex <- growth_tbl_flex("Nutrition Biomarkers", expo_var, out_var, exposure, outcome, H1, H1adj, T)
 tbl2supp <- growth_tbl("Nutrition Biomarkers", expo_var, out_var, exposure, outcome, H1, H1adj)
 tbl2flexsupp <- growth_tbl_flex("Nutrition Biomarkers", expo_var, out_var, exposure, outcome, H1, H1adj)
->>>>>>> fc7ed91107ec56e51b1d4fd9d3e8d2e4a656b2d1
 
 #### Table 3 ####
 

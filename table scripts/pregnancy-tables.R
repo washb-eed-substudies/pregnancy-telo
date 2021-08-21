@@ -4,7 +4,7 @@ library('flextable')
 library('officer')
 library('here')
 source(here("table-functions.R"))
-# source(here::here("0-config.R"))
+source(here::here("0-config.R"))
 
 # load enrollment characteristics and results
 # d <- read.csv(paste0(dropboxDir, "Data/Cleaned/Audrie/bangladesh-dm-ee-stress-growth-covariates-stresslab-anthro.csv"))
@@ -73,29 +73,21 @@ H4adj <- readRDS(here('results/adjusted/H4_adj_res.RDS'))
 
 exposure <- c("vitD_nmol_per_L", "logFERR_inf", "logSTFR_inf", "logRBP_inf", "vit_A_def", "iron_def", "vit_D_def")
 outcome <- c("TS_t2_Z", "TS_t3_Z", "delta_TS_Z")
-expo_var <- c("Vitamin D", "Ferritin", "sTfR", "RBP", "Vit A Deficiency", "Iron Deficiency", "Vitamin D Deficiency")
+expo_var <- c("Vitamin D (nmol/L)", "Log ferritin", "Log sTfR", "Log RBP", "Vit A Deficiency", "Iron Deficiency", "Vitamin D Deficiency")
 out_var <- c("Telomeres Year 1", "Telomeres Year 2", "Telomere Change Year 1 and Year 2")
 results <- H1
 results_adj <- H1adj
 
-<<<<<<< HEAD
-tbl2 <- pregnancy_tbl("Nutrition Biomarkers", expo_var, out_var, exposure, outcome, H1, H1adj)
-tbl2
-tbl2flex <- pregnancy_tbl_flex("Nutrition Biomarkers", expo_var, out_var, exposure, outcome, H1, H1adj)
-tbl2supp <- pregnancy_tbl("Nutrition Biomarkers", expo_var, out_var, exposure, outcome, H1, H1adj)
-tbl2flexsupp <- pregnancy_tbl_flex("Nutrition Biomarkers", expo_var, out_var, exposure, outcome, H1, H1adj)
-=======
 tbl2 <- growth_tbl("Nutrition Biomarkers", expo_var, out_var, exposure, outcome, H1, H1adj, T)
 tbl2flex <- growth_tbl_flex("Nutrition Biomarkers", expo_var, out_var, exposure, outcome, H1, H1adj, T)
 tbl2supp <- growth_tbl("Nutrition Biomarkers", expo_var, out_var, exposure, outcome, H1, H1adj)
 tbl2flexsupp <- growth_tbl_flex("Nutrition Biomarkers", expo_var, out_var, exposure, outcome, H1, H1adj)
->>>>>>> fc7ed91107ec56e51b1d4fd9d3e8d2e4a656b2d1
 
 #### Table 3 ####
 
 exposure <- c("ln_preg_cort")
 outcome <- c("TS_t2_Z", "TS_t3_Z", "delta_TS_Z")
-expo_var <- c("Cortisol")
+expo_var <- c("Ln pregnancy cortisol")
 out_var <- c("Telomeres Year 1", "Telomeres Year 2", "Telomere Change Year 1 and Year 2")
 results <- H2
 results_adj <- H2adj
@@ -110,7 +102,7 @@ tbl3flexsupp <- growth_tbl_flex("Serum Stress Biomarker", expo_var, out_var, exp
 
 exposure <- c("logCRP", "logAGP", "ifng_mom_t0", "sumscore_t0_mom_Z")
 outcome <- c("TS_t2_Z", "TS_t3_Z", "delta_TS_Z")
-expo_var <- c("CRP", "AGP", "IFNG", "Sum Score")
+expo_var <- c("Log CRP", "Log AGP", "Initial IFNG", "Inflammation Sum Score")
 out_var <- c("Telomeres Year 1", "Telomeres Year 2", "Telomere Change Year 1 and Year 2")
 results <- H3
 results_adj <- H3adj
@@ -124,7 +116,7 @@ tbl4flexsupp <- growth_tbl_flex("Inflammation Biomarkers", expo_var, out_var, ex
 
 exposure <- c("ln_preg_estri")
 outcome <- c("TS_t2_Z", "TS_t3_Z", "delta_TS_Z")
-expo_var <- c("Estriol")
+expo_var <- c("Ln estriol")
 out_var <- c("Telomeres Year 1", "Telomeres Year 2", "Telomere Change Year 1 and Year 2")
 results <- H4
 results_adj <- H4adj

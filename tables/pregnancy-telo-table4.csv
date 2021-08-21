@@ -1,6 +1,6 @@
 "","name","Outcome","N","25th Percentile","75th Percentile","Outcome, 75th Percentile v. 25th Percentile"," "," "," "," "
 "1"," "," "," "," "," ","Adjusted"," "," "," "," "
 "2"," "," "," "," "," ","Predicted Outcome at 25th Percentile","Predicted Outcome at 75th Percentile","Coefficient (95% CI)","P-value","FDR adjusted P-value"
-"3","Estriol","Telomeres Year 1","452","0.71","1.7","-0.04","-0.05","-0.01 (-0.14, 0.13)","0.94","0.94"
+"3","Ln estriol","Telomeres Year 1","452","0.71","1.7","-0.04","-0.05","-0.01 (-0.14, 0.13)","0.94","0.94"
 "4","","Telomeres Year 2","509","0.76","1.72","-0.09","-0.28","-0.19 (-0.5, 0.12)","0.24","0.35"
 "5","","Telomere Change Year 1 and Year 2","387","0.78","1.71","0.19","0.1","-0.08 (-0.22, 0.05)","0.23","0.35"

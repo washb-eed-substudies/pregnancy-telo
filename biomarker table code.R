@@ -15,6 +15,14 @@ writeqntle<-function(vector) {
   paste(quantiles[3], " (", quantiles[2], ", ", quantiles[4], ")", sep="")
 }
 
+nperc <- function(vector){
+  n <- sum(vector==1, na.rm=T)
+  perc <- round(n/sum(!is.na(vector))*100)
+  paste(n, " (", perc, "%)", sep="")
+}
+
+
+
 mom_lab <-c("Outcome", 
             "Vitamin D", "Ferritin", "sTfR", "RBP",
             "Vitamin A Deficiency", "Vitamin D Deficiency", "Iron Deficiency",
@@ -40,7 +48,7 @@ view(child_lab)
 
 mom <-c("Median (25th, 75th percentile)", 
         writeqntle(d$vitD_nmol_per_L), writeqntle(d$ferr), writeqntle(d$stfr), writeqntle(d$rbp),
-        writeqntle(d$vit_A_def), writeqntle(d$vit_D_def), writeqntle(d$iron_def),
+        nperc(d$vit_A_def), nperc(d$vit_D_def), nperc(d$iron_def),
         writeqntle(d$preg_cort), writeqntle(d$preg_estri), 
         writeqntle(d$il1_mom_t0), writeqntle(d$il6_mom_t0), writeqntle(d$tnfa_mom_t0), writeqntle(d$il12_mom_t0), writeqntle(d$ifng_mom_t0), writeqntle(d$il4_mom_t0), writeqntle(d$il5_mom_t0), writeqntle(d$il13_mom_t0), writeqntle(d$il17_mom_t0), writeqntle(d$il21_mom_t0), writeqntle(d$il10_mom_t0), writeqntle(d$il2_mom_t0), writeqntle(d$gmcsf_mom_t0), writeqntle(d$agp), writeqntle(d$crp))
 

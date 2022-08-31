@@ -6,12 +6,16 @@ rm(list=ls())
 
 source(here::here("0-config.R"))
 
-d<-readRDS(paste0(dropboxDir, "Data/Cleaned/Audrie/pregnancy_telo_covariates_data.RDS"))
+d <- readRDS("/Users/sophiatan/Downloads/bangladesh-cleaned-master-data.RDS")
+d <- d %>% filter(pregnancy_telo==1)
+#d<-readRDS(paste0(dropboxDir, "Data/Cleaned/Audrie/pregnancy_telo_covariates_data.RDS"))
+d <- d %>% mutate(vit_A_def = ifelse(RBP_inf_preg < 0.7, 1, 0),
+                  vit_A_low = ifelse(RBP_inf_preg < 1.05, 1, 0))
 
 #Set list of adjustment variables
 #Make vectors of adjustment variable names
-Wvars<-c("sex","birthord", "momage","momheight","momedu", 
-         "hfiacat", "Nlt18","Ncomp", "watmin", "walls", "floor", "HHwealth",
+Wvars<-c("sex","birthord", "momage","momheight","momedu","gest_age_weeks", 
+         "hfiacat", "Nlt18","Ncomp", "watmin", "walls", "floor", "HHwealth_scaled",
          "tr", "life_viol_any_t3", "viol_any_preg")
 
 Wvars[!(Wvars %in% colnames(d))]
@@ -40,7 +44,7 @@ pick_covariates <- function(j){
 ##Hypothesis 1
 #Maternal nutrition is positively associated with child telomere length
 Xvars <- c("vitD_nmol_per_L", "logFERR_inf", "logSTFR_inf", "logRBP_inf", 
-           "vit_A_def", "iron_def", "vit_D_def")          
+           "vit_A_def", "vit_A_low", "iron_def", "vit_D_def")          
 Yvars <- c("TS_t2_Z", "TS_t3_Z", "delta_TS_Z")
 
 #Fit models
@@ -62,7 +66,7 @@ for(i in Xvars){
 H1_adj_res <- NULL
 for(i in 1:nrow(H1_adj_models)){
   res <- data.frame(X=H1_adj_models$X[i], Y=H1_adj_models$Y[i])
-  if(grepl("_def", H1_adj_models$X[i])){
+  if(grepl("_def|_low", H1_adj_models$X[i])){
     preds <- predict_gam_diff(fit=H1_adj_models$fit[i][[1]], d=H1_adj_models$dat[i][[1]], quantile_diff=c(0.25,0.75), Xvar=res$X, Yvar=res$Y, binary=T)
   }else{
     preds <- predict_gam_diff(fit=H1_adj_models$fit[i][[1]], d=H1_adj_models$dat[i][[1]], quantile_diff=c(0.25,0.75), Xvar=res$X, Yvar=res$Y)
@@ -92,7 +96,7 @@ saveRDS(H1_adj_res, here("results/adjusted/H1_adj_res.RDS"))
 #saveRDS(H1_adj_plot_list, paste0(dropboxDir,"results/stress-growth-models/figure-objects/H1_adj_splines.RDS"))
 
 #Save plot data
-saveRDS(H1_adj_plot_data, paste0(dropboxDir,"results/stress-growth-models/figure-data/H1_adj_spline_data.RDS"))
+saveRDS(H1_adj_plot_data, here("figure-data/H1_adj_spline_data.RDS"))
 
 
 ## Hypothesis 2
@@ -145,13 +149,13 @@ saveRDS(H2_adj_res, here("results/adjusted/H2_adj_res.RDS"))
 #saveRDS(H2_adj_plot_list, paste0(dropboxDir,"results/stress-growth-models/figure-objects/H2_adj_adj_splines.RDS"))
 
 #Save plot data
-saveRDS(H2_adj_plot_data, paste0(dropboxDir,"results/stress-growth-models/figure-data/H2_adj_adj_spline_data.RDS"))
+saveRDS(H2_adj_plot_data, here("figure-data/H2_adj_spline_data.RDS"))
 
 
 
 ##Hypothesis 3
 
-Xvars <- c("logCRP", "logAGP", "ifng_mom_t0", "sumscore_t0_mom_Z")            
+Xvars <- c("logCRP", "logAGP", "mom_t0_ln_ifn", "sumscore_t0_mom_Z")            
 Yvars <- c("TS_t2_Z", "TS_t3_Z", "delta_TS_Z")
 
 #Fit models
@@ -197,7 +201,7 @@ saveRDS(H3_res, here("results/adjusted/H3_adj_res.RDS"))
 #saveRDS(H3_plot_list, paste0(dropboxDir,"results/stress-growth-models/figure-objects/H3_adj_splines.RDS"))
 
 #Save plot data
-saveRDS(H3_plot_data, paste0(dropboxDir,"results/stress-growth-models/figure-data/H3_adj_spline_data.RDS"))
+saveRDS(H3_plot_data, here("figure-data/H3_adj_spline_data.RDS"))
 
 
 ##Hypothesis 4
@@ -250,5 +254,5 @@ saveRDS(H4_res, here("results/adjusted/H4_adj_res.RDS"))
 #saveRDS(H4_plot_list, paste0(dropboxDir,"results/stress-growth-models/figure-objects/H4_adj_splines.RDS"))
 
 #Save plot data
-saveRDS(H4_plot_data, paste0(dropboxDir,"results/stress-growth-models/figure-data/H4_adj_spline_data.RDS"))
+saveRDS(H4_plot_data, here("figure-data/H4_adj_spline_data.RDS"))
 

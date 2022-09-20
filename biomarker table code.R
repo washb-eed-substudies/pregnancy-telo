@@ -5,6 +5,14 @@ library(tidyverse)
 library(flextable)
 library(officer)
 library(boxr)
+
+BOX_CLIENT_ID=b176f28aebxv34pp0irdlocofoumpamg
+BOX_CLIENT_SECRET=gT3Kf9xTtlBB3ZxSiHWEV16SsqMr5WCb
+
+box_auth(client_id = "b176f28aebxv34pp0irdlocofoumpamg", client_secret = "gT3Kf9xTtlBB3ZxSiHWEV16SsqMr5WCb")
+
+
+
 box_auth()
 
 d <- readRDS("/Users/farheenjamshed/Downloads/bangladesh-cleaned-master-data (1).RDS")

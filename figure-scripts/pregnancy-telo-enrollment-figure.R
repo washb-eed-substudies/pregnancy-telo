@@ -4,8 +4,15 @@ library(tibble)
 data <- tibble(x = -10:100, y= -10:100)
 head(data)
 
-d<-readRDS(paste0(dropboxDir, "Data/Cleaned/Audrie/pregnancy_telo_covariates_data.RDS"))
-exposures_y1 <- c("vitD_nmol_per_L", "logFERR_inf", "logSTFR_inf", "logRBP_inf", "vit_D_def", "vit_A_def", "iron_def", "ln_preg_cort", "logCRP", "logAGP", "mom_t0_ln_ifn", "sumscore_t0_mom_Z", "ln_preg_estri")
+d <- readRDS("/Users/farheenjamshed/Downloads/bangladesh-cleaned-master-data (2).RDS")
+
+d <- d %>% filter(pregnancy_telo==1)
+
+d <- d %>% mutate(vit_A_def = ifelse(RBP_inf_preg < 0.7, 1, 0),
+                  vit_A_low = ifelse(RBP_inf_preg < 1.05, 1, 0))
+
+
+exposures_y1 <- c("vitD_nmol_per_L", "logFERR_inf", "logSTFR_inf", "logRBP_inf", "vit_D_def", "vit_A_def", "vit_A_low", "iron_def", "ln_preg_cort", "logCRP", "logAGP", "mom_t0_ln_ifn", "sumscore_t0_mom_Z", "ln_preg_estri")
 outcomes_y1 <- c("TS_t2_Z", "delta_TS_Z")
 exposures_y2 <- NULL #IF EXPOSURES ARE MATERNAL PREGNANCY BIOMARKERS DO NOT USE exposures_y2 - OTHERWISE FILL IN WITH EXPOSURES AT YEAR 2
 outcomes_y2 <- c("TS_t3_Z")

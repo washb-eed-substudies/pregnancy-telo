@@ -15,7 +15,7 @@ box_auth(client_id = "b176f28aebxv34pp0irdlocofoumpamg", client_secret = "gT3Kf9
 
 box_auth()
 
-d <- readRDS("/Users/farheenjamshed/Downloads/bangladesh-cleaned-master-data (1).RDS")
+d <- readRDS("/Users/sophiatan/Downloads/bangladesh-cleaned-master-data.RDS")
 colnames(d)
 
 writeqntle<-function(vector) {
@@ -47,13 +47,6 @@ view(mom_lab)
 #MEAN OR MEDIAN? SHOULD I DO SHAPIRO TEST FOR EVERYTHING? 
      # ^^ dont do shapiro test; just use median and iqr
 
-child_lab <-c("Outcome", 
-              "TS_t2", "TS_t3", "delta_TS") 
-
-view(child_lab)
-   # SHOULD I PUT TS RATIO OR BASE PAIRS? "delta_ts_bp" OR "delta_TS"
-       # ^ use T/S ratio / relative->absolute makes assumptions to get bp
-
 mom <-c("Median (25th, 75th percentile)", 
         writeqntle(d$vitD_nmol_per_L), writeqntle(d$ferr), writeqntle(d$stfr), writeqntle(d$rbp),
         nperc(d$vit_A_def), nperc(d$vit_D_def), nperc(d$iron_def),
@@ -63,24 +56,19 @@ mom <-c("Median (25th, 75th percentile)",
 # make a proportion of moms with deficiencies
 
 
-child_t2 <- c("Median (25th, 75th percentile)", writeqntle(d$TS_t2))
+child_lab <-c("T/S ratio at Year 1", "T/S ratio at Year 2", "Change in T/S ratio between Year 1 and Year 2") 
 
-child_t3<-c("Median (25th, 75th percentile)", writeqntle(d$TS_t3))
+view(child_lab)
+# SHOULD I PUT TS RATIO OR BASE PAIRS? "delta_ts_bp" OR "delta_TS"
+# ^ use T/S ratio / relative->absolute makes assumptions to get bp
 
-child_delta<-c("Median (25th, 75th percentile)", writeqntle(d$delta_TS))
-
-view(child_t2)
-view(child_t3)
-view(child_delta)
-
+outcome <- c(writeqntle(d$TS_t2), writeqntle(d$TS_t3), writeqntle(d$delta_TS))
 
 mom_tbl<-data.table(" "= mom_lab,
                     "At Enrollment"=mom)
 
-child_tbl<-data.table(" "= child_lab,
-                      "Age 14 Months"=child_t2,
-                      "Age 28 Months"=child_t3,
-                      "Change in Year 1 and Year 2"=child_delta)
+child_tbl<-data.table("Outcome"= child_lab,
+                      "Median (25th, 75th percentile)"=outcome)
 
 view(mom_tbl)
 view(child_tbl)
@@ -93,7 +81,7 @@ sect_properties <- prop_section(
 save_as_docx("Maternal Biomarkers" = flextable(mom_tbl), path=here("preg-telo maternal biomarkers table 042922.docx"), 
              pr_section = sect_properties) 
 
-save_as_docx("Child Biomarkers" = flextable(child_tbl), path=here("preg-telo child biomarkers table 042922.docx"), 
+save_as_docx("Child Biomarkers" = flextable(child_tbl), path=here("preg-telo child biomarkers table 031323.docx"), 
              pr_section = sect_properties) 
 
 

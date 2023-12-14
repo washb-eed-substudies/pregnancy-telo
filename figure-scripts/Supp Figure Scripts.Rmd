@@ -1,0 +1,1714 @@
+
+```{r}
+rm(list=ls())
+source(here::here("0-config.R"))
+library(cowplot)
+library(patchwork)
+```
+
+Load spline data
+```{r}
+H1_spline <- readRDS(here("figure-data/H1_adj_spline_data.RDS"))
+```
+
+Load results for quartiles
+```{r}
+H1_quartiles <- readRDS(here("results/adjusted/H1_adj_res.RDS"))
+```
+
+
+********************  VITAMIN A DEFICIENCY ******************** 
+
+BAR GRAPH FOR YEAR 1:
+
+```{r}
+
+d_for_plot <- function(x_name, y_name, x_var, y_var, spline, quart){
+  d <- NULL
+  for (i in 1: length(x_var)) {
+    for (j in 1:length(y_var)){
+      exists <- (quart%>%filter(X==x_var[i], Y==y_var[j]) %>% nrow()) != 0
+      if (exists){
+        new <- data.frame(x=x_name[i], y=y_name[j], quart%>%filter(X==x_var[i], Y==y_var[j]))
+        d <- rbind(d, new)
+      }
+    }
+  }
+  d
+}
+
+d1 <- d_for_plot(c("Vitamin A deficiency"),
+                 c("Telomere length Year 1"), 
+                 c("vit_A_def"),   
+                 c("TS_t2_Z"),
+                 H1_spline, H1_quartiles)
+
+d1$x <- factor(d1$x,levels=c("Vitamin A deficiency"))
+#d1$x <- factor(d1$x, levels=rev(levels(d1$x)))
+d1$y <- factor(d1$y)
+d1$`Time of outcome measurement` <- factor(ifelse(grepl("t2", d1$Y), "Age 14 months", "Age 28 months"))
+
+vit_a_def_T1_bar <- ggplot(d1) + geom_col(aes(x=0.5, y=pred.q1)) + 
+  geom_col(aes(x=1.5, y=pred.q3)) + 
+  scale_y_continuous("Predicted child telomere length\nat Year 1 (Z-score)") + 
+  scale_x_continuous("Maternal vitamin A", breaks=c(0.5,1.5), label=c("Normal", "Deficient")) + 
+  scale_color_manual(values = tableau10[c(7:1)]) + 
+  theme_ki() +
+  theme(plot.title = element_text(hjust = 0),
+        axis.title.x = element_text(size=11),
+        strip.text = element_text(hjust=0.5, size=10),
+        strip.placement = "outside",
+        axis.text.y = element_text(hjust = 1, size=9),
+        panel.spacing = unit(0.5, "lines"),
+        legend.position = "bottom")      
+
+vit_a_def_T1_bar %>% ggsave(filename="figures/Bar Graphs/Vitamin A Deficiency/Year 1.jpg", width=10, height=7)
+
+```
+
+SPLINE CURVE FOR YEAR 1:
+
+```{r}
+
+d_for_plot <- function(x_name, y_name, x_var, y_var, spline, quart){
+  d <- NULL
+  for (i in 1: length(x_var)) {
+    for (j in 1:length(y_var)){
+      exists <- (quart%>%filter(X==x_var[i], Y==y_var[j]) %>% nrow()) != 0
+      if (exists){
+        new <- data.frame(x=x_name[i], y=y_name[j], spline%>%filter(Xvar==x_var[i], Yvar==y_var[j]), quart%>%filter(X==x_var[i], Y==y_var[j])%>%select(q1, q3))
+        d <- rbind(d, new)
+      }
+    }
+  }
+  d
+}
+
+d1 <- d_for_plot(c("Vitamin A deficiency"),
+                 c("Telomere length Year 1"), 
+                 c("vit_A_def"),   
+                 c("TS_t2_Z"),
+                 H1_spline, H1_quartiles) #%>% left_join(colors,"x")
+
+d1$x <- factor(d1$x,levels=c("Vitamin A deficiency"))
+#d1$x <- factor(d1$x, levels=rev(levels(d1$x)))
+d1$y <- factor(d1$y)
+
+# d1 <- d1 %>% filter(!grepl("def", Xvar))
+
+vit_a_def_T1_spline <- d1 %>% ggplot(aes(x=X))+
+  geom_smooth(aes(y = fit, color=x), se = F) +
+  geom_vline(aes(xintercept=q1), size=.5, color="grey30", linetype="dashed") +
+  geom_vline(aes(xintercept=q3), size=.5, color="grey30", linetype="dashed") +
+  #geom_point(aes(y=Y), alpha=0.5) +
+  geom_ribbon(aes(ymin=lwrS, ymax=uprS, fill=x, color=x), alpha=0.5) + 
+  scale_x_continuous("Maternal vitamin A", breaks=c(0,1), label=c("Normal", "Deficient")) + 
+  scale_y_continuous("Predicted child telomere length\nat Year 1 (Z-score)") + 
+  scale_colour_manual(values=tableau10[c(1,5,6,4)]) + 
+  scale_fill_manual(values=tableau10[c(1,5,6,4)]) + 
+  theme_ki() 
+
+vit_a_def_T1_spline %>% ggsave(filename="figures/Spline Curves/Vitamin A Deficiency/Year 1.jpg", width=10, height=7)
+
+
+```
+
+BAR GRAPH FOR YEAR 2:
+
+```{r}
+
+d_for_plot <- function(x_name, y_name, x_var, y_var, spline, quart){
+  d <- NULL
+  for (i in 1: length(x_var)) {
+    for (j in 1:length(y_var)){
+      exists <- (quart%>%filter(X==x_var[i], Y==y_var[j]) %>% nrow()) != 0
+      if (exists){
+        new <- data.frame(x=x_name[i], y=y_name[j], quart%>%filter(X==x_var[i], Y==y_var[j]))
+        d <- rbind(d, new)
+      }
+    }
+  }
+  d
+}
+
+d1 <- d_for_plot(c("Vitamin A deficiency"),
+                 c("Telomere length Year 2"), 
+                 c("vit_A_def"),   
+                 c("TS_t3_Z"),
+                 H1_spline, H1_quartiles)
+
+d1$x <- factor(d1$x,levels=c("Vitamin A deficiency"))
+#d1$x <- factor(d1$x, levels=rev(levels(d1$x)))
+d1$y <- factor(d1$y)
+d1$`Time of outcome measurement` <- factor(ifelse(grepl("t3", d1$Y), "Age 28 months", "Age 14 months"))
+
+vit_a_def_T2_bar <- ggplot(d1) + geom_col(aes(x=0.5, y=pred.q1)) + 
+  geom_col(aes(x=1.5, y=pred.q3)) + 
+  scale_y_continuous("Predicted child telomere length\nat Year 2 (Z-score)") + 
+  scale_x_continuous("Maternal vitamin A", breaks=c(0.5,1.5), label=c("Normal", "Deficient")) + 
+  scale_color_manual(values = tableau10[c(7:1)]) + 
+  theme_ki() +
+  theme(plot.title = element_text(hjust = 0),
+        axis.title.x = element_text(size=11),
+        strip.text = element_text(hjust=0.5, size=10),
+        strip.placement = "outside",
+        axis.text.y = element_text(hjust = 1, size=9),
+        panel.spacing = unit(0.5, "lines"),
+        legend.position = "bottom")      
+
+vit_a_def_T2_bar %>% ggsave(filename="figures/Bar Graphs/Vitamin A Deficiency/Year 2.jpg", width=10, height=7)
+
+```
+
+SPLINE CURVE FOR YEAR 2:
+
+```{r}
+
+d_for_plot <- function(x_name, y_name, x_var, y_var, spline, quart){
+  d <- NULL
+  for (i in 1: length(x_var)) {
+    for (j in 1:length(y_var)){
+      exists <- (quart%>%filter(X==x_var[i], Y==y_var[j]) %>% nrow()) != 0
+      if (exists){
+        new <- data.frame(x=x_name[i], y=y_name[j], spline%>%filter(Xvar==x_var[i], Yvar==y_var[j]), quart%>%filter(X==x_var[i], Y==y_var[j])%>%select(q1, q3))
+        d <- rbind(d, new)
+      }
+    }
+  }
+  d
+}
+
+d1 <- d_for_plot(c("Vitamin A deficiency"),
+                 c("Telomere length Year 2"), 
+                 c("vit_A_def"),   
+                 c("TS_t3_Z"),
+                 H1_spline, H1_quartiles) #%>% left_join(colors,"x")
+
+d1$x <- factor(d1$x,levels=c("Vitamin A deficiency"))
+#d1$x <- factor(d1$x, levels=rev(levels(d1$x)))
+d1$y <- factor(d1$y)
+
+# d1 <- d1 %>% filter(!grepl("def", Xvar))
+
+vit_a_def_T2_spline <- d1 %>% ggplot(aes(x=X))+
+  geom_smooth(aes(y = fit, color=x), se = F) +
+  geom_vline(aes(xintercept=q1), size=.5, color="grey30", linetype="dashed") +
+  geom_vline(aes(xintercept=q3), size=.5, color="grey30", linetype="dashed") +
+  #geom_point(aes(y=Y), alpha=0.5) +
+  geom_ribbon(aes(ymin=lwrS, ymax=uprS, fill=x, color=x), alpha=0.5) + 
+  scale_x_continuous("Maternal vitamin A", breaks=c(0,1), label=c("Normal", "Deficient")) + 
+  scale_y_continuous("Predicted child telomere length\nat Year 2 (Z-score)") + 
+  scale_colour_manual(values=tableau10[c(1,5,6,4)]) + 
+  scale_fill_manual(values=tableau10[c(1,5,6,4)]) + 
+  theme_ki() 
+
+vit_a_def_T2_spline %>% ggsave(filename="figures/Spline Curves/Vitamin A Deficiency/Year 2.jpg", width=10, height=7)
+
+```
+
+BAR GRAPH FOR CHANGE BETWEEN YEAR 1 AND YEAR 2:
+
+```{r}
+
+d_for_plot <- function(x_name, y_name, x_var, y_var, spline, quart){
+  d <- NULL
+  for (i in 1: length(x_var)) {
+    for (j in 1:length(y_var)){
+      exists <- (quart%>%filter(X==x_var[i], Y==y_var[j]) %>% nrow()) != 0
+      if (exists){
+        new <- data.frame(x=x_name[i], y=y_name[j], quart%>%filter(X==x_var[i], Y==y_var[j]))
+        d <- rbind(d, new)
+      }
+    }
+  }
+  d
+}
+
+d1 <- d_for_plot(c("Vitamin A deficiency"),
+                 c("Telomere length change between Year 1 and Year 2"), 
+                 c("vit_A_def"),   
+                 c("delta_TS_Z"),
+                 H1_spline, H1_quartiles)
+
+d1$x <- factor(d1$x,levels=c("Vitamin A deficiency"))
+#d1$x <- factor(d1$x, levels=rev(levels(d1$x)))
+########.     d1$`Time of outcome measurement` <- factor(ifelse(grepl("t3", d1$Y), "Age 28 months", "Age 14 months"))
+
+vit_a_def_delta_bar <- ggplot(d1) + geom_col(aes(x=0.5, y=pred.q1)) + 
+  geom_col(aes(x=1.5, y=pred.q3)) + 
+  scale_y_continuous("Change in telomere length\nbetween years 1 and 2") + 
+  scale_x_continuous("Maternal vitamin A", breaks=c(0.5,1.5), label=c("Normal", "Deficient")) + 
+  scale_color_manual(values = tableau10[c(7:1)]) + 
+  theme_ki() +
+  theme(plot.title = element_text(hjust = 0),
+        axis.title.x = element_text(size=11),
+        strip.text = element_text(hjust=0.5, size=10),
+        strip.placement = "outside",
+        axis.text.y = element_text(hjust = 1, size=9),
+        panel.spacing = unit(0.5, "lines"),
+        legend.position = "bottom")      
+
+vit_a_def_delta_bar %>% ggsave(filename="figures/Bar Graphs/Vitamin A Deficiency/Change Between Year 1 and Year 2.jpg", width=10, height=7)
+
+```
+
+SPLINE CURVE FOR CHANGE BETWEEN YEAR 1 AND YEAR 2:
+
+```{r}
+
+d_for_plot <- function(x_name, y_name, x_var, y_var, spline, quart){
+  d <- NULL
+  for (i in 1: length(x_var)) {
+    for (j in 1:length(y_var)){
+      exists <- (quart%>%filter(X==x_var[i], Y==y_var[j]) %>% nrow()) != 0
+      if (exists){
+        new <- data.frame(x=x_name[i], y=y_name[j], spline%>%filter(Xvar==x_var[i], Yvar==y_var[j]), quart%>%filter(X==x_var[i], Y==y_var[j])%>%select(q1, q3))
+        d <- rbind(d, new)
+      }
+    }
+  }
+  d
+}
+
+d1 <- d_for_plot(c("Vitamin A deficiency"),
+                 c("Telomere length change between Year 1 and Year 2"), 
+                 c("vit_A_def"),   
+                 c("delta_TS_Z"),
+                 H1_spline, H1_quartiles) #%>% left_join(colors,"x")
+
+d1$x <- factor(d1$x,levels=c("Vitamin A deficiency"))
+#d1$x <- factor(d1$x, levels=rev(levels(d1$x)))
+d1$y <- factor(d1$y)
+
+# d1 <- d1 %>% filter(!grepl("def", Xvar))
+
+vit_a_def_delta_spline <- d1 %>% ggplot(aes(x=X))+
+  geom_smooth(aes(y = fit, color=x), se = F) +
+  geom_vline(aes(xintercept=q1), size=.5, color="grey30", linetype="dashed") +
+  geom_vline(aes(xintercept=q3), size=.5, color="grey30", linetype="dashed") +
+  #geom_point(aes(y=Y), alpha=0.5) +
+  geom_ribbon(aes(ymin=lwrS, ymax=uprS, fill=x, color=x), alpha=0.5) + 
+  scale_x_continuous("Maternal vitamin A", breaks=c(0,1), label=c("Normal", "Deficient")) + 
+  scale_y_continuous("Change in telomere length\nbetween years 1 and 2") + 
+  scale_colour_manual(values=tableau10[c(1,5,6,4)]) + 
+  scale_fill_manual(values=tableau10[c(1,5,6,4)]) + 
+  theme_ki() 
+
+vit_a_def_delta_spline %>% ggsave(filename="figures/Spline Curves/Vitamin A Deficiency/Change Between Year 1 and Year 2.jpg", width=10, height=7)
+
+```
+
+********************  LOW VITAMIN A  ******************** 
+
+BAR GRAPH FOR YEAR 1:
+
+```{r}
+
+d_for_plot <- function(x_name, y_name, x_var, y_var, spline, quart){
+  d <- NULL
+  for (i in 1: length(x_var)) {
+    for (j in 1:length(y_var)){
+      exists <- (quart%>%filter(X==x_var[i], Y==y_var[j]) %>% nrow()) != 0
+      if (exists){
+        new <- data.frame(x=x_name[i], y=y_name[j], quart%>%filter(X==x_var[i], Y==y_var[j]))
+        d <- rbind(d, new)
+      }
+    }
+  }
+  d
+}
+
+d1 <- d_for_plot(c("Low Vitamin A"),
+                 c("Telomere length Year 1"), 
+                 c("vit_A_low"),   
+                 c("TS_t2_Z"),
+                 H1_spline, H1_quartiles)
+
+d1$x <- factor(d1$x,levels=c("Low Vitamin A"))
+#d1$x <- factor(d1$x, levels=rev(levels(d1$x)))
+d1$y <- factor(d1$y)
+d1$`Time of outcome measurement` <- factor(ifelse(grepl("t2", d1$Y), "Age 14 months", "Age 28 months"))
+
+low_vit_a_T1_bar <- ggplot(d1) + geom_col(aes(x=0.5, y=pred.q1)) + 
+  geom_col(aes(x=1.5, y=pred.q3)) + 
+  scale_y_continuous("Predicted child telomere length\nat Year 1 (Z-score)") + 
+  scale_x_continuous("Maternal vitamin A", breaks=c(0.5,1.5), label=c("Normal", "Low")) + 
+  scale_color_manual(values = tableau10[c(7:1)]) + 
+  theme_ki() +
+  theme(plot.title = element_text(hjust = 0),
+        axis.title.x = element_text(size=11),
+        strip.text = element_text(hjust=0.5, size=10),
+        strip.placement = "outside",
+        axis.text.y = element_text(hjust = 1, size=9),
+        panel.spacing = unit(0.5, "lines"),
+        legend.position = "bottom")      
+
+low_vit_a_T1_bar %>% ggsave(filename="figures/Bar Graphs/Low Vitamin A/Year 1.jpg", width=10, height=7)
+
+```
+
+SPLINE CURVE FOR YEAR 1:
+
+```{r}
+
+d_for_plot <- function(x_name, y_name, x_var, y_var, spline, quart){
+  d <- NULL
+  for (i in 1: length(x_var)) {
+    for (j in 1:length(y_var)){
+      exists <- (quart%>%filter(X==x_var[i], Y==y_var[j]) %>% nrow()) != 0
+      if (exists){
+        new <- data.frame(x=x_name[i], y=y_name[j], spline%>%filter(Xvar==x_var[i], Yvar==y_var[j]), quart%>%filter(X==x_var[i], Y==y_var[j])%>%select(q1, q3))
+        d <- rbind(d, new)
+      }
+    }
+  }
+  d
+}
+
+d1 <- d_for_plot(c("Low Vitamin A"),
+                 c("Telomere length Year 1"), 
+                 c("vit_A_low"),   
+                 c("TS_t2_Z"),
+                 H1_spline, H1_quartiles) #%>% left_join(colors,"x")
+
+d1$x <- factor(d1$x,levels=c("Low Vitamin A"))
+#d1$x <- factor(d1$x, levels=rev(levels(d1$x)))
+d1$y <- factor(d1$y)
+
+# d1 <- d1 %>% filter(!grepl("def", Xvar))
+
+low_vit_a_T1_spline <- d1 %>% ggplot(aes(x=X))+
+  geom_smooth(aes(y = fit, color=x), se = F) +
+  geom_vline(aes(xintercept=q1), size=.5, color="grey30", linetype="dashed") +
+  geom_vline(aes(xintercept=q3), size=.5, color="grey30", linetype="dashed") +
+  #geom_point(aes(y=Y), alpha=0.5) +
+  geom_ribbon(aes(ymin=lwrS, ymax=uprS, fill=x, color=x), alpha=0.5) + 
+  scale_x_continuous("Maternal vitamin A", breaks=c(0,1), label=c("Normal", "Low")) + 
+  scale_y_continuous("Predicted child telomere length\nat Year 1 (Z-score)") + 
+  scale_colour_manual(values=tableau10[c(1,5,6,4)]) + 
+  scale_fill_manual(values=tableau10[c(1,5,6,4)]) + 
+  theme_ki() 
+
+low_vit_a_T1_spline %>% ggsave(filename="figures/Spline Curves/Low Vitamin A/Year 1.jpg", width=10, height=7)
+
+```
+
+BAR GRAPH FOR YEAR 2:
+
+```{r}
+
+d_for_plot <- function(x_name, y_name, x_var, y_var, spline, quart){
+  d <- NULL
+  for (i in 1: length(x_var)) {
+    for (j in 1:length(y_var)){
+      exists <- (quart%>%filter(X==x_var[i], Y==y_var[j]) %>% nrow()) != 0
+      if (exists){
+        new <- data.frame(x=x_name[i], y=y_name[j], quart%>%filter(X==x_var[i], Y==y_var[j]))
+        d <- rbind(d, new)
+      }
+    }
+  }
+  d
+}
+
+d1 <- d_for_plot(c("Low Vitamin A"),
+                 c("Telomere length Year 2"), 
+                 c("vit_A_low"),   
+                 c("TS_t3_Z"),
+                 H1_spline, H1_quartiles)
+
+d1$x <- factor(d1$x,levels=c("Low Vitamin A"))
+#d1$x <- factor(d1$x, levels=rev(levels(d1$x)))
+d1$y <- factor(d1$y)
+d1$`Time of outcome measurement` <- factor(ifelse(grepl("t3", d1$Y), "Age 28 months", "Age 14 months"))
+
+low_vit_a_T2_bar <- ggplot(d1) + geom_col(aes(x=0.5, y=pred.q1)) + 
+  geom_col(aes(x=1.5, y=pred.q3)) + 
+  scale_y_continuous("Predicted child telomere length\nat Year 2 (Z-score)") + 
+  scale_x_continuous("Maternal vitamin A", breaks=c(0.5,1.5), label=c("Normal", "Low")) + 
+  scale_color_manual(values = tableau10[c(7:1)]) + 
+  theme_ki() +
+  theme(plot.title = element_text(hjust = 0),
+        axis.title.x = element_text(size=11),
+        strip.text = element_text(hjust=0.5, size=10),
+        strip.placement = "outside",
+        axis.text.y = element_text(hjust = 1, size=9),
+        panel.spacing = unit(0.5, "lines"),
+        legend.position = "bottom")      
+
+low_vit_a_T2_bar %>% ggsave(filename="figures/Bar Graphs/Low Vitamin A/Year 2.jpg", width=10, height=7)
+
+```
+
+SPLINE CURVE FOR YEAR 2:
+
+```{r}
+
+d_for_plot <- function(x_name, y_name, x_var, y_var, spline, quart){
+  d <- NULL
+  for (i in 1: length(x_var)) {
+    for (j in 1:length(y_var)){
+      exists <- (quart%>%filter(X==x_var[i], Y==y_var[j]) %>% nrow()) != 0
+      if (exists){
+        new <- data.frame(x=x_name[i], y=y_name[j], spline%>%filter(Xvar==x_var[i], Yvar==y_var[j]), quart%>%filter(X==x_var[i], Y==y_var[j])%>%select(q1, q3))
+        d <- rbind(d, new)
+      }
+    }
+  }
+  d
+}
+
+d1 <- d_for_plot(c("Low Vitamin A"),
+                 c("Telomere length Year 2"), 
+                 c("vit_A_low"),   
+                 c("TS_t3_Z"),
+                 H1_spline, H1_quartiles) #%>% left_join(colors,"x")
+
+d1$x <- factor(d1$x,levels=c("Low Vitamin A"))
+#d1$x <- factor(d1$x, levels=rev(levels(d1$x)))
+d1$y <- factor(d1$y)
+
+# d1 <- d1 %>% filter(!grepl("def", Xvar))
+
+low_vit_a_T2_spline <- d1 %>% ggplot(aes(x=X))+
+  geom_smooth(aes(y = fit, color=x), se = F) +
+  geom_vline(aes(xintercept=q1), size=.5, color="grey30", linetype="dashed") +
+  geom_vline(aes(xintercept=q3), size=.5, color="grey30", linetype="dashed") +
+  #geom_point(aes(y=Y), alpha=0.5) +
+  geom_ribbon(aes(ymin=lwrS, ymax=uprS, fill=x, color=x), alpha=0.5) + 
+  scale_x_continuous("Maternal vitamin A", breaks=c(0,1), label=c("Normal", "Low")) + 
+  scale_y_continuous("Predicted child telomere length\nat Year 2 (Z-score)") + 
+  scale_colour_manual(values=tableau10[c(1,5,6,4)]) + 
+  scale_fill_manual(values=tableau10[c(1,5,6,4)]) + 
+  theme_ki() 
+
+low_vit_a_T2_spline %>% ggsave(filename="figures/Spline Curves/Low Vitamin A/Year 2.jpg", width=10, height=7)
+
+```
+
+BAR GRAPH FOR CHANGE BETWEEN YEAR 1 AND YEAR 2:
+
+```{r}
+
+d_for_plot <- function(x_name, y_name, x_var, y_var, spline, quart){
+  d <- NULL
+  for (i in 1: length(x_var)) {
+    for (j in 1:length(y_var)){
+      exists <- (quart%>%filter(X==x_var[i], Y==y_var[j]) %>% nrow()) != 0
+      if (exists){
+        new <- data.frame(x=x_name[i], y=y_name[j], quart%>%filter(X==x_var[i], Y==y_var[j]))
+        d <- rbind(d, new)
+      }
+    }
+  }
+  d
+}
+
+d1 <- d_for_plot(c("Low Vitamin A"),
+                 c("Telomere length change between Year 1 and Year 2"), 
+                 c("vit_A_low"),   
+                 c("delta_TS_Z"),
+                 H1_spline, H1_quartiles)
+
+d1$x <- factor(d1$x,levels=c("Low Vitamin A"))
+#d1$x <- factor(d1$x, levels=rev(levels(d1$x)))
+########.     d1$`Time of outcome measurement` <- factor(ifelse(grepl("t3", d1$Y), "Age 28 months", "Age 14 months"))
+
+low_vit_a_delta_bar <- ggplot(d1) + geom_col(aes(x=0.5, y=pred.q1)) + 
+  geom_col(aes(x=1.5, y=pred.q3)) + 
+  scale_y_continuous("Change in telomere length\nbetween years 1 and 2") + 
+  scale_x_continuous("Maternal vitamin A", breaks=c(0.5,1.5), label=c("Normal", "Low")) + 
+  scale_color_manual(values = tableau10[c(7:1)]) + 
+  theme_ki() +
+  theme(plot.title = element_text(hjust = 0),
+        axis.title.x = element_text(size=11),
+        strip.text = element_text(hjust=0.5, size=10),
+        strip.placement = "outside",
+        axis.text.y = element_text(hjust = 1, size=9),
+        panel.spacing = unit(0.5, "lines"),
+        legend.position = "bottom")      
+
+low_vit_a_delta_bar %>% ggsave(filename="figures/Bar Graphs/Low Vitamin A/Change Between Year 1 and Year 2.jpg", width=10, height=7)
+
+```
+
+SPLINE CURVE FOR CHANGE BETWEEN YEAR 1 AND YEAR 2:
+
+```{r}
+
+d_for_plot <- function(x_name, y_name, x_var, y_var, spline, quart){
+  d <- NULL
+  for (i in 1: length(x_var)) {
+    for (j in 1:length(y_var)){
+      exists <- (quart%>%filter(X==x_var[i], Y==y_var[j]) %>% nrow()) != 0
+      if (exists){
+        new <- data.frame(x=x_name[i], y=y_name[j], spline%>%filter(Xvar==x_var[i], Yvar==y_var[j]), quart%>%filter(X==x_var[i], Y==y_var[j])%>%select(q1, q3))
+        d <- rbind(d, new)
+      }
+    }
+  }
+  d
+}
+
+d1 <- d_for_plot(c("Low Vitamin A"),
+                 c("Telomere length change between Year 1 and Year 2"), 
+                 c("vit_A_low"),   
+                 c("delta_TS_Z"),
+                 H1_spline, H1_quartiles) #%>% left_join(colors,"x")
+
+d1$x <- factor(d1$x,levels=c("Low Vitamin A"))
+#d1$x <- factor(d1$x, levels=rev(levels(d1$x)))
+d1$y <- factor(d1$y)
+
+# d1 <- d1 %>% filter(!grepl("def", Xvar))
+
+low_vit_a_delta_spline <- d1 %>% ggplot(aes(x=X))+
+  geom_smooth(aes(y = fit, color=x), se = F) +
+  geom_vline(aes(xintercept=q1), size=.5, color="grey30", linetype="dashed") +
+  geom_vline(aes(xintercept=q3), size=.5, color="grey30", linetype="dashed") +
+  #geom_point(aes(y=Y), alpha=0.5) +
+  geom_ribbon(aes(ymin=lwrS, ymax=uprS, fill=x, color=x), alpha=0.5) + 
+  scale_x_continuous("Maternal vitamin A", breaks=c(0,1), label=c("Normal", "Low")) + 
+  scale_y_continuous("Change in telomere length\nbetween years 1 and 2") + 
+  scale_colour_manual(values=tableau10[c(1,5,6,4)]) + 
+  scale_fill_manual(values=tableau10[c(1,5,6,4)]) + 
+  theme_ki() 
+
+low_vit_a_delta_spline %>% ggsave(filename="figures/Spline Curves/Low Vitamin A/Change Between Year 1 and Year 2.jpg", width=10, height=7)
+
+```
+
+
+
+
+********************  VITAMIN D DEFICIENCY ******************** 
+
+BAR GRAPH FOR YEAR 1:
+
+```{r}
+
+d_for_plot <- function(x_name, y_name, x_var, y_var, spline, quart){
+  d <- NULL
+  for (i in 1: length(x_var)) {
+    for (j in 1:length(y_var)){
+      exists <- (quart%>%filter(X==x_var[i], Y==y_var[j]) %>% nrow()) != 0
+      if (exists){
+        new <- data.frame(x=x_name[i], y=y_name[j], quart%>%filter(X==x_var[i], Y==y_var[j]))
+        d <- rbind(d, new)
+      }
+    }
+  }
+  d
+}
+
+d1 <- d_for_plot(c("Vitamin D deficiency"),
+                 c("Telomere length Year 1"), 
+                 c("vit_D_def"),   
+                 c("TS_t2_Z"),
+                 H1_spline, H1_quartiles)
+
+d1$x <- factor(d1$x,levels=c("Vitamin D deficiency"))
+#d1$x <- factor(d1$x, levels=rev(levels(d1$x)))
+d1$y <- factor(d1$y)
+d1$`Time of outcome measurement` <- factor(ifelse(grepl("t2", d1$Y), "Age 14 months", "Age 28 months"))
+
+vit_d_def_T1_bar <- ggplot(d1) + geom_col(aes(x=0.5, y=pred.q1)) + 
+  geom_col(aes(x=1.5, y=pred.q3)) + 
+  scale_y_continuous("Predicted child telomere length\nat Year 1 (Z-score)") + 
+  scale_x_continuous("Maternal vitamin D", breaks=c(0.5,1.5), label=c("Normal", "Deficient")) + 
+  scale_color_manual(values = tableau10[c(7:1)]) + 
+  theme_ki() +
+  theme(plot.title = element_text(hjust = 0),
+        axis.title.x = element_text(size=11),
+        strip.text = element_text(hjust=0.5, size=10),
+        strip.placement = "outside",
+        axis.text.y = element_text(hjust = 1, size=9),
+        panel.spacing = unit(0.5, "lines"),
+        legend.position = "bottom")      
+
+vit_d_def_T1_bar %>% ggsave(filename="figures/Bar Graphs/Vitamin D Deficiency/Year 1.jpg", width=10, height=7)
+
+```
+
+SPLINE CURVE FOR YEAR 1:
+
+```{r}
+
+d_for_plot <- function(x_name, y_name, x_var, y_var, spline, quart){
+  d <- NULL
+  for (i in 1: length(x_var)) {
+    for (j in 1:length(y_var)){
+      exists <- (quart%>%filter(X==x_var[i], Y==y_var[j]) %>% nrow()) != 0
+      if (exists){
+        new <- data.frame(x=x_name[i], y=y_name[j], spline%>%filter(Xvar==x_var[i], Yvar==y_var[j]), quart%>%filter(X==x_var[i], Y==y_var[j])%>%select(q1, q3))
+        d <- rbind(d, new)
+      }
+    }
+  }
+  d
+}
+
+d1 <- d_for_plot(c("Vitamin D deficiency"),
+                 c("Telomere length Year 1"), 
+                 c("vit_D_def"),   
+                 c("TS_t2_Z"),
+                 H1_spline, H1_quartiles) #%>% left_join(colors,"x")
+
+d1$x <- factor(d1$x,levels=c("Vitamin D deficiency"))
+#d1$x <- factor(d1$x, levels=rev(levels(d1$x)))
+d1$y <- factor(d1$y)
+
+# d1 <- d1 %>% filter(!grepl("def", Xvar))
+
+vit_d_def_T1_spline <- d1 %>% ggplot(aes(x=X))+
+  geom_smooth(aes(y = fit, color=x), se = F) +
+  geom_vline(aes(xintercept=q1), size=.5, color="grey30", linetype="dashed") +
+  geom_vline(aes(xintercept=q3), size=.5, color="grey30", linetype="dashed") +
+  #geom_point(aes(y=Y), alpha=0.5) +
+  geom_ribbon(aes(ymin=lwrS, ymax=uprS, fill=x, color=x), alpha=0.5) + 
+  scale_x_continuous("Maternal vitamin D", breaks=c(0,1), label=c("Normal", "Deficient")) + 
+  scale_y_continuous("Predicted child telomere length\nat Year 1 (Z-score)") + 
+  scale_colour_manual(values=tableau10[c(1,5,6,4)]) + 
+  scale_fill_manual(values=tableau10[c(1,5,6,4)]) + 
+  theme_ki() 
+
+vit_d_def_T1_spline %>% ggsave(filename="figures/Spline Curves/Vitamin D Deficiency/Year 1.jpg", width=10, height=7)
+
+
+```
+
+BAR GRAPH FOR YEAR 2:
+
+```{r}
+
+d_for_plot <- function(x_name, y_name, x_var, y_var, spline, quart){
+  d <- NULL
+  for (i in 1: length(x_var)) {
+    for (j in 1:length(y_var)){
+      exists <- (quart%>%filter(X==x_var[i], Y==y_var[j]) %>% nrow()) != 0
+      if (exists){
+        new <- data.frame(x=x_name[i], y=y_name[j], quart%>%filter(X==x_var[i], Y==y_var[j]))
+        d <- rbind(d, new)
+      }
+    }
+  }
+  d
+}
+
+d1 <- d_for_plot(c("Vitamin D deficiency"),
+                 c("Telomere length Year 2"), 
+                 c("vit_D_def"),   
+                 c("TS_t3_Z"),
+                 H1_spline, H1_quartiles)
+
+d1$x <- factor(d1$x,levels=c("Vitamin D deficiency"))
+#d1$x <- factor(d1$x, levels=rev(levels(d1$x)))
+d1$y <- factor(d1$y)
+d1$`Time of outcome measurement` <- factor(ifelse(grepl("t3", d1$Y), "Age 28 months", "Age 14 months"))
+
+vit_d_def_T2_bar <- ggplot(d1) + geom_col(aes(x=0.5, y=pred.q1)) + 
+  geom_col(aes(x=1.5, y=pred.q3)) + 
+  scale_y_continuous("Predicted child telomere length\nat Year 2 (Z-score)") + 
+  scale_x_continuous("Maternal vitamin D", breaks=c(0.5,1.5), label=c("Normal", "Deficient")) + 
+  scale_color_manual(values = tableau10[c(7:1)]) + 
+  theme_ki() +
+  theme(plot.title = element_text(hjust = 0),
+        axis.title.x = element_text(size=11),
+        strip.text = element_text(hjust=0.5, size=10),
+        strip.placement = "outside",
+        axis.text.y = element_text(hjust = 1, size=9),
+        panel.spacing = unit(0.5, "lines"),
+        legend.position = "bottom")      
+
+vit_d_def_T2_bar %>% ggsave(filename="figures/Bar Graphs/Vitamin D Deficiency/Year 2.jpg", width=10, height=7)
+
+```
+
+SPLINE CURVE FOR YEAR 2:
+
+```{r}
+
+d_for_plot <- function(x_name, y_name, x_var, y_var, spline, quart){
+  d <- NULL
+  for (i in 1: length(x_var)) {
+    for (j in 1:length(y_var)){
+      exists <- (quart%>%filter(X==x_var[i], Y==y_var[j]) %>% nrow()) != 0
+      if (exists){
+        new <- data.frame(x=x_name[i], y=y_name[j], spline%>%filter(Xvar==x_var[i], Yvar==y_var[j]), quart%>%filter(X==x_var[i], Y==y_var[j])%>%select(q1, q3))
+        d <- rbind(d, new)
+      }
+    }
+  }
+  d
+}
+
+d1 <- d_for_plot(c("Vitamin D deficiency"),
+                 c("Telomere length Year 2"), 
+                 c("vit_D_def"),   
+                 c("TS_t3_Z"),
+                 H1_spline, H1_quartiles) #%>% left_join(colors,"x")
+
+d1$x <- factor(d1$x,levels=c("Vitamin D deficiency"))
+#d1$x <- factor(d1$x, levels=rev(levels(d1$x)))
+d1$y <- factor(d1$y)
+
+# d1 <- d1 %>% filter(!grepl("def", Xvar))
+
+vit_d_def_T2_spline <- d1 %>% ggplot(aes(x=X))+
+  geom_smooth(aes(y = fit, color=x), se = F) +
+  geom_vline(aes(xintercept=q1), size=.5, color="grey30", linetype="dashed") +
+  geom_vline(aes(xintercept=q3), size=.5, color="grey30", linetype="dashed") +
+  #geom_point(aes(y=Y), alpha=0.5) +
+  geom_ribbon(aes(ymin=lwrS, ymax=uprS, fill=x, color=x), alpha=0.5) + 
+  scale_x_continuous("Maternal vitamin D", breaks=c(0,1), label=c("Normal", "Deficient")) + 
+  scale_y_continuous("Predicted child telomere length\nat Year 2 (Z-score)") + 
+  scale_colour_manual(values=tableau10[c(1,5,6,4)]) + 
+  scale_fill_manual(values=tableau10[c(1,5,6,4)]) + 
+  theme_ki() 
+
+vit_d_def_T2_spline %>% ggsave(filename="figures/Spline Curves/Vitamin D Deficiency/Year 2.jpg", width=10, height=7)
+
+```
+
+BAR GRAPH FOR CHANGE BETWEEN YEAR 1 AND YEAR 2:
+
+```{r}
+
+d_for_plot <- function(x_name, y_name, x_var, y_var, spline, quart){
+  d <- NULL
+  for (i in 1: length(x_var)) {
+    for (j in 1:length(y_var)){
+      exists <- (quart%>%filter(X==x_var[i], Y==y_var[j]) %>% nrow()) != 0
+      if (exists){
+        new <- data.frame(x=x_name[i], y=y_name[j], quart%>%filter(X==x_var[i], Y==y_var[j]))
+        d <- rbind(d, new)
+      }
+    }
+  }
+  d
+}
+
+d1 <- d_for_plot(c("Vitamin D deficiency"),
+                 c("Telomere length change between Year 1 and Year 2"), 
+                 c("vit_D_def"),   
+                 c("delta_TS_Z"),
+                 H1_spline, H1_quartiles)
+
+d1$x <- factor(d1$x,levels=c("Vitamin D deficiency"))
+#d1$x <- factor(d1$x, levels=rev(levels(d1$x)))
+########.     d1$`Time of outcome measurement` <- factor(ifelse(grepl("t3", d1$Y), "Age 28 months", "Age 14 months"))
+
+vit_d_def_delta_bar <- ggplot(d1) + geom_col(aes(x=0.5, y=pred.q1)) + 
+  geom_col(aes(x=1.5, y=pred.q3)) + 
+  scale_y_continuous("Change in telomere length\nbetween years 1 and 2") + 
+  scale_x_continuous("Maternal vitamin D", breaks=c(0.5,1.5), label=c("Normal", "Deficient")) + 
+  scale_color_manual(values = tableau10[c(7:1)]) + 
+  theme_ki() +
+  theme(plot.title = element_text(hjust = 0),
+        axis.title.x = element_text(size=11),
+        strip.text = element_text(hjust=0.5, size=10),
+        strip.placement = "outside",
+        axis.text.y = element_text(hjust = 1, size=9),
+        panel.spacing = unit(0.5, "lines"),
+        legend.position = "bottom")      
+
+vit_d_def_delta_bar %>% ggsave(filename="figures/Bar Graphs/Vitamin D Deficiency/Change Between Year 1 and Year 2.jpg", width=10, height=7)
+
+```
+
+SPLINE CURVE FOR CHANGE BETWEEN YEAR 1 AND YEAR 2:
+
+```{r}
+
+d_for_plot <- function(x_name, y_name, x_var, y_var, spline, quart){
+  d <- NULL
+  for (i in 1: length(x_var)) {
+    for (j in 1:length(y_var)){
+      exists <- (quart%>%filter(X==x_var[i], Y==y_var[j]) %>% nrow()) != 0
+      if (exists){
+        new <- data.frame(x=x_name[i], y=y_name[j], spline%>%filter(Xvar==x_var[i], Yvar==y_var[j]), quart%>%filter(X==x_var[i], Y==y_var[j])%>%select(q1, q3))
+        d <- rbind(d, new)
+      }
+    }
+  }
+  d
+}
+
+d1 <- d_for_plot(c("Vitamin D deficiency"),
+                 c("Telomere length change between Year 1 and Year 2"), 
+                 c("vit_D_def"),   
+                 c("delta_TS_Z"),
+                 H1_spline, H1_quartiles) #%>% left_join(colors,"x")
+
+d1$x <- factor(d1$x,levels=c("Vitamin D deficiency"))
+#d1$x <- factor(d1$x, levels=rev(levels(d1$x)))
+d1$y <- factor(d1$y)
+
+# d1 <- d1 %>% filter(!grepl("def", Xvar))
+
+vit_d_def_delta_spline <- d1 %>% ggplot(aes(x=X))+
+  geom_smooth(aes(y = fit, color=x), se = F) +
+  geom_vline(aes(xintercept=q1), size=.5, color="grey30", linetype="dashed") +
+  geom_vline(aes(xintercept=q3), size=.5, color="grey30", linetype="dashed") +
+  #geom_point(aes(y=Y), alpha=0.5) +
+  geom_ribbon(aes(ymin=lwrS, ymax=uprS, fill=x, color=x), alpha=0.5) + 
+  scale_x_continuous("Maternal vitamin D", breaks=c(0,1), label=c("Normal", "Deficient")) + 
+  scale_y_continuous("Change in telomere length\nbetween years 1 and 2") + 
+  scale_colour_manual(values=tableau10[c(1,5,6,4)]) + 
+  scale_fill_manual(values=tableau10[c(1,5,6,4)]) + 
+  theme_ki() 
+
+vit_d_def_delta_spline %>% ggsave(filename="figures/Spline Curves/Vitamin D Deficiency/Change Between Year 1 and Year 2.jpg", width=10, height=7)
+
+```
+
+
+
+********************  IRON DEFICIENCY ******************** 
+
+BAR GRAPH FOR YEAR 1:
+
+```{r}
+
+d_for_plot <- function(x_name, y_name, x_var, y_var, spline, quart){
+  d <- NULL
+  for (i in 1: length(x_var)) {
+    for (j in 1:length(y_var)){
+      exists <- (quart%>%filter(X==x_var[i], Y==y_var[j]) %>% nrow()) != 0
+      if (exists){
+        new <- data.frame(x=x_name[i], y=y_name[j], quart%>%filter(X==x_var[i], Y==y_var[j]))
+        d <- rbind(d, new)
+      }
+    }
+  }
+  d
+}
+
+d1 <- d_for_plot(c("Iron deficiency"),
+                 c("Telomere length Year 1"), 
+                 c("iron_def"),   
+                 c("TS_t2_Z"),
+                 H1_spline, H1_quartiles)
+
+d1$x <- factor(d1$x,levels=c("Iron deficiency"))
+#d1$x <- factor(d1$x, levels=rev(levels(d1$x)))
+d1$y <- factor(d1$y)
+d1$`Time of outcome measurement` <- factor(ifelse(grepl("t2", d1$Y), "Age 14 months", "Age 28 months"))
+
+iron_def_T1_bar <- ggplot(d1) + geom_col(aes(x=0.5, y=pred.q1)) + 
+  geom_col(aes(x=1.5, y=pred.q3)) + 
+  scale_y_continuous("Predicted child telomere length\nat Year 1 (Z-score)") + 
+  scale_x_continuous("Maternal Iron", breaks=c(0.5,1.5), label=c("Normal", "Deficient")) + 
+  scale_color_manual(values = tableau10[c(7:1)]) + 
+  theme_ki() +
+  theme(plot.title = element_text(hjust = 0),
+        axis.title.x = element_text(size=11),
+        strip.text = element_text(hjust=0.5, size=10),
+        strip.placement = "outside",
+        axis.text.y = element_text(hjust = 1, size=9),
+        panel.spacing = unit(0.5, "lines"),
+        legend.position = "bottom")      
+
+iron_def_T1_bar %>% ggsave(filename="figures/Bar Graphs/Iron Deficiency/Year 1.jpg", width=10, height=7)
+
+```
+
+SPLINE CURVE FOR YEAR 1:
+
+```{r}
+
+d_for_plot <- function(x_name, y_name, x_var, y_var, spline, quart){
+  d <- NULL
+  for (i in 1: length(x_var)) {
+    for (j in 1:length(y_var)){
+      exists <- (quart%>%filter(X==x_var[i], Y==y_var[j]) %>% nrow()) != 0
+      if (exists){
+        new <- data.frame(x=x_name[i], y=y_name[j], spline%>%filter(Xvar==x_var[i], Yvar==y_var[j]), quart%>%filter(X==x_var[i], Y==y_var[j])%>%select(q1, q3))
+        d <- rbind(d, new)
+      }
+    }
+  }
+  d
+}
+
+d1 <- d_for_plot(c("Iron deficiency"),
+                 c("Telomere length Year 1"), 
+                 c("iron_def"),   
+                 c("TS_t2_Z"),
+                 H1_spline, H1_quartiles) #%>% left_join(colors,"x")
+
+d1$x <- factor(d1$x,levels=c("Iron deficiency"))
+#d1$x <- factor(d1$x, levels=rev(levels(d1$x)))
+d1$y <- factor(d1$y)
+
+# d1 <- d1 %>% filter(!grepl("def", Xvar))
+
+iron_def_T1_spline <- d1 %>% ggplot(aes(x=X))+
+  geom_smooth(aes(y = fit, color=x), se = F) +
+  geom_vline(aes(xintercept=q1), size=.5, color="grey30", linetype="dashed") +
+  geom_vline(aes(xintercept=q3), size=.5, color="grey30", linetype="dashed") +
+  #geom_point(aes(y=Y), alpha=0.5) +
+  geom_ribbon(aes(ymin=lwrS, ymax=uprS, fill=x, color=x), alpha=0.5) + 
+  scale_x_continuous("Maternal Iron", breaks=c(0,1), label=c("Normal", "Deficient")) + 
+  scale_y_continuous("Predicted child telomere length\nat Year 1 (Z-score)") + 
+  scale_colour_manual(values=tableau10[c(1,5,6,4)]) + 
+  scale_fill_manual(values=tableau10[c(1,5,6,4)]) + 
+  theme_ki() 
+
+iron_def_T1_spline %>% ggsave(filename="figures/Spline Curves/Iron Deficiency/Year 1.jpg", width=10, height=7)
+
+```
+
+BAR GRAPH FOR YEAR 2:
+
+```{r}
+
+d_for_plot <- function(x_name, y_name, x_var, y_var, spline, quart){
+  d <- NULL
+  for (i in 1: length(x_var)) {
+    for (j in 1:length(y_var)){
+      exists <- (quart%>%filter(X==x_var[i], Y==y_var[j]) %>% nrow()) != 0
+      if (exists){
+        new <- data.frame(x=x_name[i], y=y_name[j], quart%>%filter(X==x_var[i], Y==y_var[j]))
+        d <- rbind(d, new)
+      }
+    }
+  }
+  d
+}
+
+d1 <- d_for_plot(c("Iron deficiency"),
+                 c("Telomere length Year 2"), 
+                 c("iron_def"),   
+                 c("TS_t3_Z"),
+                 H1_spline, H1_quartiles)
+
+d1$x <- factor(d1$x,levels=c("Iron deficiency"))
+#d1$x <- factor(d1$x, levels=rev(levels(d1$x)))
+d1$y <- factor(d1$y)
+d1$`Time of outcome measurement` <- factor(ifelse(grepl("t3", d1$Y), "Age 28 months", "Age 14 months"))
+
+iron_def_T2_bar <- ggplot(d1) + geom_col(aes(x=0.5, y=pred.q1)) + 
+  geom_col(aes(x=1.5, y=pred.q3)) + 
+  scale_y_continuous("Predicted child telomere length\nat Year 2 (Z-score)") + 
+  scale_x_continuous("Maternal Iron", breaks=c(0.5,1.5), label=c("Normal", "Deficient")) + 
+  scale_color_manual(values = tableau10[c(7:1)]) + 
+  theme_ki() +
+  theme(plot.title = element_text(hjust = 0),
+        axis.title.x = element_text(size=11),
+        strip.text = element_text(hjust=0.5, size=10),
+        strip.placement = "outside",
+        axis.text.y = element_text(hjust = 1, size=9),
+        panel.spacing = unit(0.5, "lines"),
+        legend.position = "bottom")      
+
+iron_def_T2_bar %>% ggsave(filename="figures/Bar Graphs/Iron Deficiency/Year 2.jpg", width=10, height=7)
+
+```
+
+SPLINE CURVE FOR YEAR 2:
+
+```{r}
+
+d_for_plot <- function(x_name, y_name, x_var, y_var, spline, quart){
+  d <- NULL
+  for (i in 1: length(x_var)) {
+    for (j in 1:length(y_var)){
+      exists <- (quart%>%filter(X==x_var[i], Y==y_var[j]) %>% nrow()) != 0
+      if (exists){
+        new <- data.frame(x=x_name[i], y=y_name[j], spline%>%filter(Xvar==x_var[i], Yvar==y_var[j]), quart%>%filter(X==x_var[i], Y==y_var[j])%>%select(q1, q3))
+        d <- rbind(d, new)
+      }
+    }
+  }
+  d
+}
+
+d1 <- d_for_plot(c("Iron deficiency"),
+                 c("Telomere length Year 2"), 
+                 c("iron_def"),   
+                 c("TS_t3_Z"),
+                 H1_spline, H1_quartiles) #%>% left_join(colors,"x")
+
+d1$x <- factor(d1$x,levels=c("Iron deficiency"))
+#d1$x <- factor(d1$x, levels=rev(levels(d1$x)))
+d1$y <- factor(d1$y)
+
+# d1 <- d1 %>% filter(!grepl("def", Xvar))
+
+iron_def_T2_spline <- d1 %>% ggplot(aes(x=X))+
+  geom_smooth(aes(y = fit, color=x), se = F) +
+  geom_vline(aes(xintercept=q1), size=.5, color="grey30", linetype="dashed") +
+  geom_vline(aes(xintercept=q3), size=.5, color="grey30", linetype="dashed") +
+  #geom_point(aes(y=Y), alpha=0.5) +
+  geom_ribbon(aes(ymin=lwrS, ymax=uprS, fill=x, color=x), alpha=0.5) + 
+  scale_x_continuous("Maternal Iron", breaks=c(0,1), label=c("Normal", "Deficient")) + 
+  scale_y_continuous("Predicted child telomere length\nat Year 2 (Z-score)") + 
+  scale_colour_manual(values=tableau10[c(1,5,6,4)]) + 
+  scale_fill_manual(values=tableau10[c(1,5,6,4)]) + 
+  theme_ki() 
+
+iron_def_T2_spline %>% ggsave(filename="figures/Spline Curves/Iron Deficiency/Year 2.jpg", width=10, height=7)
+
+```
+
+BAR GRAPH FOR CHANGE BETWEEN YEAR 1 AND YEAR 2:
+
+```{r}
+
+d_for_plot <- function(x_name, y_name, x_var, y_var, spline, quart){
+  d <- NULL
+  for (i in 1: length(x_var)) {
+    for (j in 1:length(y_var)){
+      exists <- (quart%>%filter(X==x_var[i], Y==y_var[j]) %>% nrow()) != 0
+      if (exists){
+        new <- data.frame(x=x_name[i], y=y_name[j], quart%>%filter(X==x_var[i], Y==y_var[j]))
+        d <- rbind(d, new)
+      }
+    }
+  }
+  d
+}
+
+d1 <- d_for_plot(c("Iron deficiency"),
+                 c("Telomere length change between Year 1 and Year 2"), 
+                 c("iron_def"),   
+                 c("delta_TS_Z"),
+                 H1_spline, H1_quartiles)
+
+d1$x <- factor(d1$x,levels=c("Iron deficiency"))
+#d1$x <- factor(d1$x, levels=rev(levels(d1$x)))
+########.     d1$`Time of outcome measurement` <- factor(ifelse(grepl("t3", d1$Y), "Age 28 months", "Age 14 months"))
+
+iron_def_delta_bar <- ggplot(d1) + geom_col(aes(x=0.5, y=pred.q1)) + 
+  geom_col(aes(x=1.5, y=pred.q3)) + 
+  scale_y_continuous("Change in telomere length\nbetween years 1 and 2") + 
+  scale_x_continuous("Maternal Iron", breaks=c(0.5,1.5), label=c("Normal", "Deficient")) + 
+  scale_color_manual(values = tableau10[c(7:1)]) + 
+  theme_ki() +
+  theme(plot.title = element_text(hjust = 0),
+        axis.title.x = element_text(size=11),
+        strip.text = element_text(hjust=0.5, size=10),
+        strip.placement = "outside",
+        axis.text.y = element_text(hjust = 1, size=9),
+        panel.spacing = unit(0.5, "lines"),
+        legend.position = "bottom")      
+
+iron_def_delta_bar %>% ggsave(filename="figures/Bar Graphs/Iron Deficiency/Change Between Year 1 and Year 2.jpg", width=10, height=7)
+
+```
+
+SPLINE CURVE FOR CHANGE BETWEEN YEAR 1 AND YEAR 2:
+
+```{r}
+
+d_for_plot <- function(x_name, y_name, x_var, y_var, spline, quart){
+  d <- NULL
+  for (i in 1: length(x_var)) {
+    for (j in 1:length(y_var)){
+      exists <- (quart%>%filter(X==x_var[i], Y==y_var[j]) %>% nrow()) != 0
+      if (exists){
+        new <- data.frame(x=x_name[i], y=y_name[j], spline%>%filter(Xvar==x_var[i], Yvar==y_var[j]), quart%>%filter(X==x_var[i], Y==y_var[j])%>%select(q1, q3))
+        d <- rbind(d, new)
+      }
+    }
+  }
+  d
+}
+
+d1 <- d_for_plot(c("Iron deficiency"),
+                 c("Telomere length change between Year 1 and Year 2"), 
+                 c("iron_def"),   
+                 c("delta_TS_Z"),
+                 H1_spline, H1_quartiles) #%>% left_join(colors,"x")
+
+d1$x <- factor(d1$x,levels=c("Iron deficiency"))
+#d1$x <- factor(d1$x, levels=rev(levels(d1$x)))
+d1$y <- factor(d1$y)
+
+# d1 <- d1 %>% filter(!grepl("def", Xvar))
+
+iron_def_delta_spline <- d1 %>% ggplot(aes(x=X))+
+  geom_smooth(aes(y = fit, color=x), se = F) +
+  geom_vline(aes(xintercept=q1), size=.5, color="grey30", linetype="dashed") +
+  geom_vline(aes(xintercept=q3), size=.5, color="grey30", linetype="dashed") +
+  #geom_point(aes(y=Y), alpha=0.5) +
+  geom_ribbon(aes(ymin=lwrS, ymax=uprS, fill=x, color=x), alpha=0.5) + 
+  scale_x_continuous("Maternal Iron", breaks=c(0,1), label=c("Normal", "Deficient")) + 
+  scale_y_continuous("Change in telomere length\nbetween years 1 and 2") + 
+  scale_colour_manual(values=tableau10[c(1,5,6,4)]) + 
+  scale_fill_manual(values=tableau10[c(1,5,6,4)]) + 
+  theme_ki() 
+
+iron_def_delta_spline %>% ggsave(filename="figures/Spline Curves/Iron Deficiency/Change Between Year 1 and Year 2.jpg", width=10, height=7)
+
+```
+
+********************  RETINOL-BINDING PROTEIN (RBP) ******************** 
+
+SPLINE CURVE FOR YEAR 1:
+
+```{r}
+
+d_for_plot <- function(x_name, y_name, x_var, y_var, spline, quart){
+  d <- NULL
+  for (i in 1: length(x_var)) {
+    for (j in 1:length(y_var)){
+      exists <- (quart%>%filter(X==x_var[i], Y==y_var[j]) %>% nrow()) != 0
+      if (exists){
+        new <- data.frame(x=x_name[i], y=y_name[j], spline%>%filter(Xvar==x_var[i], Yvar==y_var[j]), quart%>%filter(X==x_var[i], Y==y_var[j])%>%select(q1, q3))
+        d <- rbind(d, new)
+      }
+    }
+  }
+  d
+}
+
+d1 <- d_for_plot(c("RBP"),
+                 c("Telomere length Year 1"), 
+                 c("logRBP_inf"),   
+                 c("TS_t2_Z"),
+                 H1_spline, H1_quartiles) #%>% left_join(colors,"x")
+
+d1$x <- factor(d1$x,levels=c("RBP"))
+#d1$x <- factor(d1$x, levels=rev(levels(d1$x)))
+d1$y <- factor(d1$y)
+
+# d1 <- d1 %>% filter(!grepl("def", Xvar))
+
+RBP_T1_spline <- d1 %>% ggplot(aes(x=X))+
+  geom_smooth(aes(y = fit, color=x), se = F) +
+  geom_vline(aes(xintercept=q1), size=.5, color="grey30", linetype="dashed") +
+  geom_vline(aes(xintercept=q3), size=.5, color="grey30", linetype="dashed") +
+  #geom_point(aes(y=Y), alpha=0.5) +
+  geom_ribbon(aes(ymin=lwrS, ymax=uprS, fill=x, color=x), alpha=0.5) + 
+  scale_x_continuous("Ln Retinol-Binding Protein (??mol/L)") + 
+  scale_y_continuous("Predicted child telomere length\nat Year 1 (Z-score)") + 
+  scale_colour_manual(values=tableau10[c(1,5,6,4)]) + 
+  scale_fill_manual(values=tableau10[c(1,5,6,4)]) + 
+  theme_ki() 
+
+RBP_T1_spline %>% ggsave(filename="figures/Spline Curves/RBP/Year 1.jpg", width=10, height=7)
+
+```
+
+SPLINE CURVE FOR YEAR 2:
+
+```{r}
+
+d_for_plot <- function(x_name, y_name, x_var, y_var, spline, quart){
+  d <- NULL
+  for (i in 1: length(x_var)) {
+    for (j in 1:length(y_var)){
+      exists <- (quart%>%filter(X==x_var[i], Y==y_var[j]) %>% nrow()) != 0
+      if (exists){
+        new <- data.frame(x=x_name[i], y=y_name[j], spline%>%filter(Xvar==x_var[i], Yvar==y_var[j]), quart%>%filter(X==x_var[i], Y==y_var[j])%>%select(q1, q3))
+        d <- rbind(d, new)
+      }
+    }
+  }
+  d
+}
+
+d1 <- d_for_plot(c("RBP"),
+                 c("Telomere length Year 2"), 
+                 c("logRBP_inf"),   
+                 c("TS_t3_Z"),
+                 H1_spline, H1_quartiles) #%>% left_join(colors,"x")
+
+d1$x <- factor(d1$x,levels=c("RBP"))
+#d1$x <- factor(d1$x, levels=rev(levels(d1$x)))
+d1$y <- factor(d1$y)
+
+# d1 <- d1 %>% filter(!grepl("def", Xvar))
+
+RBP_T2_spline <- d1 %>% ggplot(aes(x=X))+
+  geom_smooth(aes(y = fit, color=x), se = F) +
+  geom_vline(aes(xintercept=q1), size=.5, color="grey30", linetype="dashed") +
+  geom_vline(aes(xintercept=q3), size=.5, color="grey30", linetype="dashed") +
+  #geom_point(aes(y=Y), alpha=0.5) +
+  geom_ribbon(aes(ymin=lwrS, ymax=uprS, fill=x, color=x), alpha=0.5) + 
+  scale_x_continuous("Ln Retinol-Binding Protein (??mol/L)") + 
+  scale_y_continuous("Predicted child telomere length\nat Year 2 (Z-score)") + 
+  scale_colour_manual(values=tableau10[c(1,5,6,4)]) + 
+  scale_fill_manual(values=tableau10[c(1,5,6,4)]) + 
+  theme_ki() 
+
+RBP_T2_spline %>% ggsave(filename="figures/Spline Curves/RBP/Year 2.jpg", width=10, height=7)
+
+```
+
+SPLINE CURVE FOR CHANGE BETWEEN YEAR 1 & YEAR 2:
+
+```{r}
+
+d_for_plot <- function(x_name, y_name, x_var, y_var, spline, quart){
+  d <- NULL
+  for (i in 1: length(x_var)) {
+    for (j in 1:length(y_var)){
+      exists <- (quart%>%filter(X==x_var[i], Y==y_var[j]) %>% nrow()) != 0
+      if (exists){
+        new <- data.frame(x=x_name[i], y=y_name[j], spline%>%filter(Xvar==x_var[i], Yvar==y_var[j]), quart%>%filter(X==x_var[i], Y==y_var[j])%>%select(q1, q3))
+        d <- rbind(d, new)
+      }
+    }
+  }
+  d
+}
+
+d1 <- d_for_plot(c("RBP"),
+                 c("Telomere length change between Year 1 and Year 2"), 
+                 c("logRBP_inf"),   
+                 c("delta_TS_Z"),
+                 H1_spline, H1_quartiles) #%>% left_join(colors,"x")
+
+d1$x <- factor(d1$x,levels=c("RBP"))
+#d1$x <- factor(d1$x, levels=rev(levels(d1$x)))
+d1$y <- factor(d1$y)
+
+# d1 <- d1 %>% filter(!grepl("def", Xvar))
+
+RBP_delta_spline <- d1 %>% ggplot(aes(x=X))+
+  geom_smooth(aes(y = fit, color=x), se = F) +
+  geom_vline(aes(xintercept=q1), size=.5, color="grey30", linetype="dashed") +
+  geom_vline(aes(xintercept=q3), size=.5, color="grey30", linetype="dashed") +
+  #geom_point(aes(y=Y), alpha=0.5) +
+  geom_ribbon(aes(ymin=lwrS, ymax=uprS, fill=x, color=x), alpha=0.5) + 
+  scale_x_continuous("Ln Retinol-Binding Protein (??mol/L)") + 
+  scale_y_continuous("Change in telomere length\nbetween years 1 and 2") + 
+  scale_colour_manual(values=tableau10[c(1,5,6,4)]) + 
+  scale_fill_manual(values=tableau10[c(1,5,6,4)]) + 
+  theme_ki() 
+
+RBP_delta_spline %>% ggsave(filename="figures/Spline Curves/RBP/Change Between Year 1 and Year 2.jpg", width=10, height=7)
+
+```
+
+********************  VITAMIN D  ******************** 
+
+SPLINE CURVE FOR YEAR 1:
+
+```{r}
+
+d_for_plot <- function(x_name, y_name, x_var, y_var, spline, quart){
+  d <- NULL
+  for (i in 1: length(x_var)) {
+    for (j in 1:length(y_var)){
+      exists <- (quart%>%filter(X==x_var[i], Y==y_var[j]) %>% nrow()) != 0
+      if (exists){
+        new <- data.frame(x=x_name[i], y=y_name[j], spline%>%filter(Xvar==x_var[i], Yvar==y_var[j]), quart%>%filter(X==x_var[i], Y==y_var[j])%>%select(q1, q3))
+        d <- rbind(d, new)
+      }
+    }
+  }
+  d
+}
+
+d1 <- d_for_plot(c("Vitamin D"),
+                 c("Telomere length Year 1"), 
+                 c("vitD_nmol_per_L"),   
+                 c("TS_t2_Z"),
+                 H1_spline, H1_quartiles) #%>% left_join(colors,"x")
+
+d1$x <- factor(d1$x,levels=c("Vitamin D"))
+#d1$x <- factor(d1$x, levels=rev(levels(d1$x)))
+d1$y <- factor(d1$y)
+
+# d1 <- d1 %>% filter(!grepl("def", Xvar))
+
+VitD_T1_spline <- d1 %>% ggplot(aes(x=X))+
+  geom_smooth(aes(y = fit, color=x), se = F) +
+  geom_vline(aes(xintercept=q1), size=.5, color="grey30", linetype="dashed") +
+  geom_vline(aes(xintercept=q3), size=.5, color="grey30", linetype="dashed") +
+  #geom_point(aes(y=Y), alpha=0.5) +
+  geom_ribbon(aes(ymin=lwrS, ymax=uprS, fill=x, color=x), alpha=0.5) + 
+  scale_x_continuous("Vitamin D (nmol/L)") + 
+  scale_y_continuous("Predicted child telomere length\nat Year 1 (Z-score)") + 
+  scale_colour_manual(values=tableau10[c(1,5,6,4)]) + 
+  scale_fill_manual(values=tableau10[c(1,5,6,4)]) + 
+  theme_ki() 
+
+VitD_T1_spline %>% ggsave(filename="figures/Spline Curves/Vitamin D/Year 1.jpg", width=10, height=7)
+
+```
+
+SPLINE CURVE FOR YEAR 2:
+
+```{r}
+
+d_for_plot <- function(x_name, y_name, x_var, y_var, spline, quart){
+  d <- NULL
+  for (i in 1: length(x_var)) {
+    for (j in 1:length(y_var)){
+      exists <- (quart%>%filter(X==x_var[i], Y==y_var[j]) %>% nrow()) != 0
+      if (exists){
+        new <- data.frame(x=x_name[i], y=y_name[j], spline%>%filter(Xvar==x_var[i], Yvar==y_var[j]), quart%>%filter(X==x_var[i], Y==y_var[j])%>%select(q1, q3))
+        d <- rbind(d, new)
+      }
+    }
+  }
+  d
+}
+
+d1 <- d_for_plot(c("Vitamin D"),
+                 c("Telomere length Year 2"), 
+                 c("vitD_nmol_per_L"),   
+                 c("TS_t3_Z"),
+                 H1_spline, H1_quartiles) #%>% left_join(colors,"x")
+
+d1$x <- factor(d1$x,levels=c("Vitamin D"))
+#d1$x <- factor(d1$x, levels=rev(levels(d1$x)))
+d1$y <- factor(d1$y)
+
+# d1 <- d1 %>% filter(!grepl("def", Xvar))
+
+VitD_T2_spline <- d1 %>% ggplot(aes(x=X))+
+  geom_smooth(aes(y = fit, color=x), se = F) +
+  geom_vline(aes(xintercept=q1), size=.5, color="grey30", linetype="dashed") +
+  geom_vline(aes(xintercept=q3), size=.5, color="grey30", linetype="dashed") +
+  #geom_point(aes(y=Y), alpha=0.5) +
+  geom_ribbon(aes(ymin=lwrS, ymax=uprS, fill=x, color=x), alpha=0.5) + 
+  scale_x_continuous("Vitamin D (nmol/L)") + 
+  scale_y_continuous("Predicted child telomere length\nat Year 2 (Z-score)") + 
+  scale_colour_manual(values=tableau10[c(1,5,6,4)]) + 
+  scale_fill_manual(values=tableau10[c(1,5,6,4)]) + 
+  theme_ki() 
+
+VitD_T2_spline %>% ggsave(filename="figures/Spline Curves/Vitamin D/Year 2.jpg", width=10, height=7)
+
+```
+
+SPLINE CURVE FOR CHANGE BETWEEN YEAR 1 & YEAR 2:
+
+```{r}
+
+d_for_plot <- function(x_name, y_name, x_var, y_var, spline, quart){
+  d <- NULL
+  for (i in 1: length(x_var)) {
+    for (j in 1:length(y_var)){
+      exists <- (quart%>%filter(X==x_var[i], Y==y_var[j]) %>% nrow()) != 0
+      if (exists){
+        new <- data.frame(x=x_name[i], y=y_name[j], spline%>%filter(Xvar==x_var[i], Yvar==y_var[j]), quart%>%filter(X==x_var[i], Y==y_var[j])%>%select(q1, q3))
+        d <- rbind(d, new)
+      }
+    }
+  }
+  d
+}
+
+d1 <- d_for_plot(c("Vitamin D"),
+                 c("Telomere length change between Year 1 and Year 2"), 
+                 c("vitD_nmol_per_L"),   
+                 c("delta_TS_Z"),
+                 H1_spline, H1_quartiles) #%>% left_join(colors,"x")
+
+d1$x <- factor(d1$x,levels=c("Vitamin D"))
+#d1$x <- factor(d1$x, levels=rev(levels(d1$x)))
+d1$y <- factor(d1$y)
+
+# d1 <- d1 %>% filter(!grepl("def", Xvar))
+
+VitD_delta_spline <- d1 %>% ggplot(aes(x=X))+
+  geom_smooth(aes(y = fit, color=x), se = F) +
+  geom_vline(aes(xintercept=q1), size=.5, color="grey30", linetype="dashed") +
+  geom_vline(aes(xintercept=q3), size=.5, color="grey30", linetype="dashed") +
+  #geom_point(aes(y=Y), alpha=0.5) +
+  geom_ribbon(aes(ymin=lwrS, ymax=uprS, fill=x, color=x), alpha=0.5) + 
+  scale_x_continuous("Vitamin D (nmol/L)") + 
+  scale_y_continuous("Change in telomere length\nbetween years 1 and 2") + 
+  scale_colour_manual(values=tableau10[c(1,5,6,4)]) + 
+  scale_fill_manual(values=tableau10[c(1,5,6,4)]) + 
+  theme_ki() 
+
+VitD_delta_spline %>% ggsave(filename="figures/Spline Curves/Vitamin D/Change Between Year 1 and Year 2.jpg", width=10, height=7)
+
+```
+
+********************  FERRITIN  ******************** 
+
+SPLINE CURVE FOR YEAR 1:
+
+```{r}
+
+d_for_plot <- function(x_name, y_name, x_var, y_var, spline, quart){
+  d <- NULL
+  for (i in 1: length(x_var)) {
+    for (j in 1:length(y_var)){
+      exists <- (quart%>%filter(X==x_var[i], Y==y_var[j]) %>% nrow()) != 0
+      if (exists){
+        new <- data.frame(x=x_name[i], y=y_name[j], spline%>%filter(Xvar==x_var[i], Yvar==y_var[j]), quart%>%filter(X==x_var[i], Y==y_var[j])%>%select(q1, q3))
+        d <- rbind(d, new)
+      }
+    }
+  }
+  d
+}
+
+d1 <- d_for_plot(c("Ferritin"),
+                 c("Telomere length Year 1"), 
+                 c("logFERR_inf"),   
+                 c("TS_t2_Z"),
+                 H1_spline, H1_quartiles) #%>% left_join(colors,"x")
+
+d1$x <- factor(d1$x,levels=c("Ferritin"))
+#d1$x <- factor(d1$x, levels=rev(levels(d1$x)))
+d1$y <- factor(d1$y)
+
+# d1 <- d1 %>% filter(!grepl("def", Xvar))
+
+Ferritin_T1_spline <- d1 %>% ggplot(aes(x=X))+
+  geom_smooth(aes(y = fit, color=x), se = F) +
+  geom_vline(aes(xintercept=q1), size=.5, color="grey30", linetype="dashed") +
+  geom_vline(aes(xintercept=q3), size=.5, color="grey30", linetype="dashed") +
+  #geom_point(aes(y=Y), alpha=0.5) +
+  geom_ribbon(aes(ymin=lwrS, ymax=uprS, fill=x, color=x), alpha=0.5) + 
+  scale_x_continuous("Ln ferritin (??g/L)") + 
+  scale_y_continuous("Predicted child telomere length\nat Year 1 (Z-score)") + 
+  scale_colour_manual(values=tableau10[c(1,5,6,4)]) + 
+  scale_fill_manual(values=tableau10[c(1,5,6,4)]) + 
+  theme_ki() 
+
+Ferritin_T1_spline %>% ggsave(filename="figures/Spline Curves/Ferritin/Year 1.jpg", width=10, height=7)
+
+```
+
+SPLINE CURVE FOR YEAR 2:
+
+```{r}
+
+d_for_plot <- function(x_name, y_name, x_var, y_var, spline, quart){
+  d <- NULL
+  for (i in 1: length(x_var)) {
+    for (j in 1:length(y_var)){
+      exists <- (quart%>%filter(X==x_var[i], Y==y_var[j]) %>% nrow()) != 0
+      if (exists){
+        new <- data.frame(x=x_name[i], y=y_name[j], spline%>%filter(Xvar==x_var[i], Yvar==y_var[j]), quart%>%filter(X==x_var[i], Y==y_var[j])%>%select(q1, q3))
+        d <- rbind(d, new)
+      }
+    }
+  }
+  d
+}
+
+d1 <- d_for_plot(c("Ferritin"),
+                 c("Telomere length Year 2"), 
+                 c("logFERR_inf"),   
+                 c("TS_t3_Z"),
+                 H1_spline, H1_quartiles) #%>% left_join(colors,"x")
+
+d1$x <- factor(d1$x,levels=c("Ferritin"))
+#d1$x <- factor(d1$x, levels=rev(levels(d1$x)))
+d1$y <- factor(d1$y)
+
+# d1 <- d1 %>% filter(!grepl("def", Xvar))
+
+Ferritin_T2_spline <- d1 %>% ggplot(aes(x=X))+
+  geom_smooth(aes(y = fit, color=x), se = F) +
+  geom_vline(aes(xintercept=q1), size=.5, color="grey30", linetype="dashed") +
+  geom_vline(aes(xintercept=q3), size=.5, color="grey30", linetype="dashed") +
+  #geom_point(aes(y=Y), alpha=0.5) +
+  geom_ribbon(aes(ymin=lwrS, ymax=uprS, fill=x, color=x), alpha=0.5) + 
+  scale_x_continuous("Ln ferritin (??g/L)") + 
+  scale_y_continuous("Predicted child telomere length\nat Year 2 (Z-score)") + 
+  scale_colour_manual(values=tableau10[c(1,5,6,4)]) + 
+  scale_fill_manual(values=tableau10[c(1,5,6,4)]) + 
+  theme_ki() 
+
+Ferritin_T2_spline %>% ggsave(filename="figures/Spline Curves/Ferritin/Year 2.jpg", width=10, height=7)
+
+```
+
+SPLINE CURVE FOR CHANGE BETWEEN YEAR 1 & YEAR 2:
+
+```{r}
+
+d_for_plot <- function(x_name, y_name, x_var, y_var, spline, quart){
+  d <- NULL
+  for (i in 1: length(x_var)) {
+    for (j in 1:length(y_var)){
+      exists <- (quart%>%filter(X==x_var[i], Y==y_var[j]) %>% nrow()) != 0
+      if (exists){
+        new <- data.frame(x=x_name[i], y=y_name[j], spline%>%filter(Xvar==x_var[i], Yvar==y_var[j]), quart%>%filter(X==x_var[i], Y==y_var[j])%>%select(q1, q3))
+        d <- rbind(d, new)
+      }
+    }
+  }
+  d
+}
+
+d1 <- d_for_plot(c("Ferritin"),
+                 c("Telomere length change between Year 1 and Year 2"), 
+                 c("logFERR_inf"),   
+                 c("delta_TS_Z"),
+                 H1_spline, H1_quartiles) #%>% left_join(colors,"x")
+
+d1$x <- factor(d1$x,levels=c("Ferritin"))
+#d1$x <- factor(d1$x, levels=rev(levels(d1$x)))
+d1$y <- factor(d1$y)
+
+# d1 <- d1 %>% filter(!grepl("def", Xvar))
+
+Ferritin_delta_spline <- d1 %>% ggplot(aes(x=X))+
+  geom_smooth(aes(y = fit, color=x), se = F) +
+  geom_vline(aes(xintercept=q1), size=.5, color="grey30", linetype="dashed") +
+  geom_vline(aes(xintercept=q3), size=.5, color="grey30", linetype="dashed") +
+  #geom_point(aes(y=Y), alpha=0.5) +
+  geom_ribbon(aes(ymin=lwrS, ymax=uprS, fill=x, color=x), alpha=0.5) + 
+  scale_x_continuous("Ln ferritin (??g/L)") + 
+  scale_y_continuous("Change in telomere length\nbetween years 1 and 2") + 
+  scale_colour_manual(values=tableau10[c(1,5,6,4)]) + 
+  scale_fill_manual(values=tableau10[c(1,5,6,4)]) + 
+  theme_ki() 
+
+Ferritin_delta_spline %>% ggsave(filename="figures/Spline Curves/Ferritin/Change Between Year 1 and Year 2.jpg", width=10, height=7)
+
+```
+
+********************  SOLUBLE TRANSFERRIN RECEPTOR (sTfR)  ******************** 
+
+SPLINE CURVE FOR YEAR 1:
+
+```{r}
+
+d_for_plot <- function(x_name, y_name, x_var, y_var, spline, quart){
+  d <- NULL
+  for (i in 1: length(x_var)) {
+    for (j in 1:length(y_var)){
+      exists <- (quart%>%filter(X==x_var[i], Y==y_var[j]) %>% nrow()) != 0
+      if (exists){
+        new <- data.frame(x=x_name[i], y=y_name[j], spline%>%filter(Xvar==x_var[i], Yvar==y_var[j]), quart%>%filter(X==x_var[i], Y==y_var[j])%>%select(q1, q3))
+        d <- rbind(d, new)
+      }
+    }
+  }
+  d
+}
+
+d1 <- d_for_plot(c("sTfR"),
+                 c("Telomere length Year 1"), 
+                 c("logSTFR_inf"),   
+                 c("TS_t2_Z"),
+                 H1_spline, H1_quartiles) #%>% left_join(colors,"x")
+
+d1$x <- factor(d1$x,levels=c("sTfR"))
+#d1$x <- factor(d1$x, levels=rev(levels(d1$x)))
+d1$y <- factor(d1$y)
+
+# d1 <- d1 %>% filter(!grepl("def", Xvar))
+
+sTfR_T1_spline <- d1 %>% ggplot(aes(x=X))+
+  geom_smooth(aes(y = fit, color=x), se = F) +
+  geom_vline(aes(xintercept=q1), size=.5, color="grey30", linetype="dashed") +
+  geom_vline(aes(xintercept=q3), size=.5, color="grey30", linetype="dashed") +
+  #geom_point(aes(y=Y), alpha=0.5) +
+  geom_ribbon(aes(ymin=lwrS, ymax=uprS, fill=x, color=x), alpha=0.5) + 
+  scale_x_continuous("Ln sTfR (mg/L)") + 
+  scale_y_continuous("Predicted child telomere length\nat Year 1 (Z-score)") + 
+  scale_colour_manual(values=tableau10[c(1,5,6,4)]) + 
+  scale_fill_manual(values=tableau10[c(1,5,6,4)]) + 
+  theme_ki() 
+
+sTfR_T1_spline %>% ggsave(filename="figures/Spline Curves/sTfR/Year 1.jpg", width=10, height=7)
+
+```
+
+SPLINE CURVE FOR YEAR 2:
+
+```{r}
+
+d_for_plot <- function(x_name, y_name, x_var, y_var, spline, quart){
+  d <- NULL
+  for (i in 1: length(x_var)) {
+    for (j in 1:length(y_var)){
+      exists <- (quart%>%filter(X==x_var[i], Y==y_var[j]) %>% nrow()) != 0
+      if (exists){
+        new <- data.frame(x=x_name[i], y=y_name[j], spline%>%filter(Xvar==x_var[i], Yvar==y_var[j]), quart%>%filter(X==x_var[i], Y==y_var[j])%>%select(q1, q3))
+        d <- rbind(d, new)
+      }
+    }
+  }
+  d
+}
+
+d1 <- d_for_plot(c("sTfR"),
+                 c("Telomere length Year 2"), 
+                 c("logSTFR_inf"),   
+                 c("TS_t3_Z"),
+                 H1_spline, H1_quartiles) #%>% left_join(colors,"x")
+
+d1$x <- factor(d1$x,levels=c("sTfR"))
+#d1$x <- factor(d1$x, levels=rev(levels(d1$x)))
+d1$y <- factor(d1$y)
+
+# d1 <- d1 %>% filter(!grepl("def", Xvar))
+
+sTfR_T2_spline <- d1 %>% ggplot(aes(x=X))+
+  geom_smooth(aes(y = fit, color=x), se = F) +
+  geom_vline(aes(xintercept=q1), size=.5, color="grey30", linetype="dashed") +
+  geom_vline(aes(xintercept=q3), size=.5, color="grey30", linetype="dashed") +
+  #geom_point(aes(y=Y), alpha=0.5) +
+  geom_ribbon(aes(ymin=lwrS, ymax=uprS, fill=x, color=x), alpha=0.5) + 
+  scale_x_continuous("Ln sTfR (mg/L)") + 
+  scale_y_continuous("Predicted child telomere length\nat Year 2 (Z-score)") + 
+  scale_colour_manual(values=tableau10[c(1,5,6,4)]) + 
+  scale_fill_manual(values=tableau10[c(1,5,6,4)]) + 
+  theme_ki() 
+
+sTfR_T2_spline %>% ggsave(filename="figures/Spline Curves/sTfR/Year 2.jpg", width=10, height=7)
+
+```
+
+SPLINE CURVE FOR CHANGE BETWEEN YEAR 1 & YEAR 2:
+
+```{r}
+
+d_for_plot <- function(x_name, y_name, x_var, y_var, spline, quart){
+  d <- NULL
+  for (i in 1: length(x_var)) {
+    for (j in 1:length(y_var)){
+      exists <- (quart%>%filter(X==x_var[i], Y==y_var[j]) %>% nrow()) != 0
+      if (exists){
+        new <- data.frame(x=x_name[i], y=y_name[j], spline%>%filter(Xvar==x_var[i], Yvar==y_var[j]), quart%>%filter(X==x_var[i], Y==y_var[j])%>%select(q1, q3))
+        d <- rbind(d, new)
+      }
+    }
+  }
+  d
+}
+
+d1 <- d_for_plot(c("sTfR"),
+                 c("Telomere length change between Year 1 and Year 2"), 
+                 c("logSTFR_inf"),   
+                 c("delta_TS_Z"),
+                 H1_spline, H1_quartiles) #%>% left_join(colors,"x")
+
+d1$x <- factor(d1$x,levels=c("sTfR"))
+#d1$x <- factor(d1$x, levels=rev(levels(d1$x)))
+d1$y <- factor(d1$y)
+
+# d1 <- d1 %>% filter(!grepl("def", Xvar))
+
+sTfR_delta_spline <- d1 %>% ggplot(aes(x=X))+
+  geom_smooth(aes(y = fit, color=x), se = F) +
+  geom_vline(aes(xintercept=q1), size=.5, color="grey30", linetype="dashed") +
+  geom_vline(aes(xintercept=q3), size=.5, color="grey30", linetype="dashed") +
+  #geom_point(aes(y=Y), alpha=0.5) +
+  geom_ribbon(aes(ymin=lwrS, ymax=uprS, fill=x, color=x), alpha=0.5) + 
+  scale_x_continuous("Ln sTfR (mg/L)") + 
+  scale_y_continuous("Change in telomere length\nbetween years 1 and 2") + 
+  scale_colour_manual(values=tableau10[c(1,5,6,4)]) + 
+  scale_fill_manual(values=tableau10[c(1,5,6,4)]) + 
+  theme_ki() 
+
+sTfR_delta_spline %>% ggsave(filename="figures/Spline Curves/sTfR/Change Between Year 1 and Year 2.jpg", width=10, height=7)
+
+```
+
+
+
+
+
+
+
+
+

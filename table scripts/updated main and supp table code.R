@@ -70,61 +70,60 @@ H4adj <- readRDS(here('results/adjusted/H4_adj_res.RDS'))
 
 
 #### Table 2 ####
-
-exposure <- c("vitD_nmol_per_L", "logFERR_inf", "logSTFR_inf", "logRBP_inf", "vit_A_low", "vit_A_def", "iron_def", "vit_D_def")
+exposure <- c("logRBP_inf", "vit_A_low", "vit_A_def", "vitD_nmol_per_L", "vit_D_def", "logFERR_inf", "logSTFR_inf", "iron_def")
 outcome <- c("TS_t2_Z", "TS_t3_Z", "delta_TS_Z")
-expo_var <- c("Vitamin D (nmol/L)", "Log ferritin", "Log sTfR", "Log RBP", "Low Vitamin A", "Vit A Deficiency", "Iron Deficiency", "Vitamin D Deficiency")
-out_var <- c("Telomeres Year 1", "Telomeres Year 2", "Telomere Change Year 1 and Year 2")
+expo_var <- c("Log RBP (umol/L)", "Low Vitamin A", "Vit A Deficiency", "25(OH)D (nmol/L)", "Vitamin D Deficiency", "Log ferritin (ug/L)", "Log sTfR (mg/L)", "Iron Deficiency")
+out_var <- c("T/S Ratio Z-score Age 14 months", "T/S Ratio Z-score Age 28 months", "Change in T/S Ratio Z-score between 14 months and 28 months")
 results <- H1
 results_adj <- H1adj
 
-tbl2 <- growth_tbl("Nutrition Biomarkers", expo_var, out_var, exposure, outcome, H1, H1adj, T)
-tbl2flex <- growth_tbl_flex("Nutrition Biomarkers", expo_var, out_var, exposure, outcome, H1, H1adj, T)
-tbl2supp <- growth_tbl("Nutrition Biomarkers", expo_var, out_var, exposure, outcome, H1, H1adj)
-tbl2flexsupp <- growth_tbl_flex("Nutrition Biomarkers", expo_var, out_var, exposure, outcome, H1, H1adj)
+tbl2 <- growth_tbl("Maternal micronutrients and child telomere length", expo_var, out_var, exposure, outcome, H1, H1adj, T)
+tbl2flex <- growth_tbl_flex("Maternal micronutrients and child telomere length", expo_var, out_var, exposure, outcome, H1, H1adj, T)
+tbl2supp <- growth_tbl("Maternal micronutrients and child telomere length", expo_var, out_var, exposure, outcome, H1, H1adj)
+tbl2flexsupp <- growth_tbl_flex("Maternal micronutrients and child telomere length", expo_var, out_var, exposure, outcome, H1, H1adj)
 
 #### Table 3 ####
 
 exposure <- c("ln_preg_cort")
 outcome <- c("TS_t2_Z", "TS_t3_Z", "delta_TS_Z")
-expo_var <- c("Ln pregnancy cortisol")
-out_var <- c("Telomeres Year 1", "Telomeres Year 2", "Telomere Change Year 1 and Year 2")
+expo_var <- c("Ln cortisol (ug/dL)")
+out_var <- c("T/S Ratio Z-score Age 14 months", "T/S Ratio Z-score Age 28 months", "Change in T/S Ratio Z-score between 14 months and 28 months")
 results <- H2
 results_adj <- H2adj
 
-tbl3 <- growth_tbl("Serum Stress Biomarker", expo_var, out_var, exposure, outcome, H2, H2adj, T)
-tbl3flex <- growth_tbl_flex("Serum stress biomarker", expo_var, out_var, exposure, outcome, H2, H2adj, T)
-tbl3supp <- growth_tbl("Serum Stress Biomarker", expo_var, out_var, exposure, outcome, H2, H2adj)
-tbl3flexsupp <- growth_tbl_flex("Serum Stress Biomarker", expo_var, out_var, exposure, outcome, H2, H2adj)
+tbl3 <- growth_tbl("Maternal cortisol and child telomere length", expo_var, out_var, exposure, outcome, H2, H2adj, T)
+tbl3flex <- growth_tbl_flex("Maternal cortisol and child telomere length", expo_var, out_var, exposure, outcome, H2, H2adj, T)
+tbl3supp <- growth_tbl("Maternal cortisol and child telomere length", expo_var, out_var, exposure, outcome, H2, H2adj)
+tbl3flexsupp <- growth_tbl_flex("Maternal cortisol and child telomere length", expo_var, out_var, exposure, outcome, H2, H2adj)
 
 
 #### Table 4 ####
 
 exposure <- c("logCRP", "logAGP", "mom_t0_ln_ifn", "sumscore_t0_mom_Z")
 outcome <- c("TS_t2_Z", "TS_t3_Z", "delta_TS_Z")
-expo_var <- c("Log CRP", "Log AGP", "Initial Log IFNG", "Inflammation Sum Score")
-out_var <- c("Telomeres Year 1", "Telomeres Year 2", "Telomere Change Year 1 and Year 2")
+expo_var <- c("Ln CRP (mg/L)", "Ln AGP (g/L)", "Ln IFN-g (pg/ml)", "Inflammation Sum Score of 13 Cytokines")
+out_var <- c("T/S Ratio Z-score Age 14 months", "T/S Ratio Z-score Age 28 months", "Change in T/S Ratio Z-score between 14 months and 28 months")
 results <- H3
 results_adj <- H3adj
 
-tbl4 <- growth_tbl("Inflammation Biomarkers", expo_var, out_var, exposure, outcome, H3, H3adj, T)
-tbl4flex <- growth_tbl_flex("Inflammation Biomarkers", expo_var, out_var, exposure, outcome, H3, H3adj, T)
-tbl4supp <- growth_tbl("Inflammation Biomarkers", expo_var, out_var, exposure, outcome, H3, H3adj)
-tbl4flexsupp <- growth_tbl_flex("Inflammation Biomarkers", expo_var, out_var, exposure, outcome, H3, H3adj)
+tbl4 <- growth_tbl("Maternal inflammation and child telomere length", expo_var, out_var, exposure, outcome, H3, H3adj, T)
+tbl4flex <- growth_tbl_flex("Maternal inflammation and child telomere length", expo_var, out_var, exposure, outcome, H3, H3adj, T)
+tbl4supp <- growth_tbl("Maternal inflammation and child telomere length", expo_var, out_var, exposure, outcome, H3, H3adj)
+tbl4flexsupp <- growth_tbl_flex("Maternal inflammation and child telomere length", expo_var, out_var, exposure, outcome, H3, H3adj)
 
 #### Table 5 ####
 
 exposure <- c("ln_preg_estri")
 outcome <- c("TS_t2_Z", "TS_t3_Z", "delta_TS_Z")
-expo_var <- c("Ln estriol")
-out_var <- c("Telomeres Year 1", "Telomeres Year 2", "Telomere Change Year 1 and Year 2")
+expo_var <- c("Ln estriol (ng/mL)")
+out_var <- c("T/S Ratio Z-score Age 14 months", "T/S Ratio Z-score Age 28 months", "Change in T/S Ratio Z-score between 14 months and 28 months")
 results <- H4
 results_adj <- H4adj
 
-tbl5 <- growth_tbl("Estriol", expo_var, out_var, exposure, outcome, H4, H4adj, T)
-tbl5flex <- growth_tbl_flex("Estriol", expo_var, out_var, exposure, outcome, H4, H4adj, T)
-tbl5supp <- growth_tbl("Estriol", expo_var, out_var, exposure, outcome, H4, H4adj)
-tbl5flexsupp <- growth_tbl_flex("Estriol", expo_var, out_var, exposure, outcome, H4, H4adj)
+tbl5 <- growth_tbl("Maternal estriol and child telomere length", expo_var, out_var, exposure, outcome, H4, H4adj, T)
+tbl5flex <- growth_tbl_flex("Maternal estriol and child telomere lengt", expo_var, out_var, exposure, outcome, H4, H4adj, T)
+tbl5supp <- growth_tbl("Maternal estriol and child telomere lengt", expo_var, out_var, exposure, outcome, H4, H4adj)
+tbl5flexsupp <- growth_tbl_flex("Maternal estriol and child telomere lengt", expo_var, out_var, exposure, outcome, H4, H4adj)
 
 #### Supplementary Tables ####
 #### Table S1 ####

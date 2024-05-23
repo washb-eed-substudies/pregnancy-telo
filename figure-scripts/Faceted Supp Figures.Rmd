@@ -29,7 +29,7 @@ d_for_plot <- function(x_name, y_name, x_var, y_var, spline, quart){
 
 ```{r}
 
-d1 <- d_for_plot(c("Vitamin D", "Vitamin D deficiency", "Ln RBP", "Vitamin A deficiency","Ln ferritin", "Ln sTfR", "Iron deficiency"),
+d1 <- d_for_plot(c("25(OH)D", "Vitamin D deficiency", "Ln RBP", "Vitamin A deficiency","Ln ferritin", "Ln sTfR", "Iron deficiency"),
                  c("Telomere length Year 1",
                    "Telomere length Year 2",
                    "Telomere length change between Year 1 and Year 2"), 
@@ -40,7 +40,7 @@ d1 <- d_for_plot(c("Vitamin D", "Vitamin D deficiency", "Ln RBP", "Vitamin A def
                  H1_spline, H1_quartiles)
 
 
-d1$x <- factor(d1$x,levels=c("Vitamin D", "Vitamin D deficiency", "Ln RBP", "Vitamin A deficiency","Ln ferritin", "Ln sTfR", "Iron deficiency"))
+d1$x <- factor(d1$x,levels=c("25(OH)D", "Vitamin D deficiency", "Ln RBP", "Vitamin A deficiency","Ln ferritin", "Ln sTfR", "Iron deficiency"))
 #d1$x <- factor(d1$x, levels=rev(levels(d1$x)))
 d1$y <- factor(d1$y)
 

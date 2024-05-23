@@ -11,8 +11,8 @@ d <- d %>% mutate(vit_A_def = ifelse(RBP_inf_preg < 0.7, 1, 0),
 
 
 #Maternal nutrition is positively/negatively associated with child TL
-Xvars <- c("vitD_nmol_per_L", "logFERR_inf", "logSTFR_inf", "logRBP_inf",
-           "vit_A_def", "vit_A_low", "iron_def", "vit_D_def")            
+Xvars <- c("logRBP_inf", "vit_A_low", "vit_A_def","vitD_nmol_per_L", "vit_D_def",
+           "logFERR_inf", "logSTFR_inf", "iron_def")            
 Yvars <- c("TS_t2_Z", "TS_t3_Z", "delta_TS_Z")
 
 
@@ -232,14 +232,18 @@ subgroup_tbl <- function(name, expo_var, out_var, sub_var, exposure, outcome, su
 }
 
 
+
+
+
+
 tbl1 <- subgroup_tbl("Maternal micronutrients", 
-                     c("Vitamin D (nmol/L)", "Vitamin D deficiency", "Ln RBP (umol/L)", "Vitamin A deficiency", "Low Vitamin A", "Ln ferritin (ug/L)","Ln sTfR (mg/L)", "Iron deficiency"),
-                     c("Telomere Length Year 1", "Telomere Length Year 2", "Telomere Length change between Year 1 and Year 2"), 
+                     c("Log RBP (umol/L)", "Low Vitamin A", "Vit A Deficiency", "25(OH)D (nmol/L)", "Vitamin D Deficiency", "Log ferritin (ug/L)", "Log sTfR (mg/L)", "Iron Deficiency"),
+                     c("T/S Ratio Z-score Age 14 months", "T/S Ratio Z-score Age 28 months", "Change in T/S Ratio Z-score between 14 months and 28 months"), 
                      c("Arm"), 
-                     c("vitD_nmol_per_L", "vit_D_def", "logRBP_inf", "vit_A_def", "low_vit_A", "logFERR_inf", "logSTFR_inf", "iron_def"),
+                     c("logRBP_inf", "vit_A_low", "vit_A_def","vitD_nmol_per_L", "vit_D_def", "logFERR_inf", "logSTFR_inf", "iron_def"),
                      c("TS_t2_Z", "TS_t3_Z", "delta_TS_Z"),
                      c("tr"), emm)
 
 save_as_docx("EMM Table: Effect modification of maternal micronutrients and child telomere length by treatment arm" = tbl1,
-             path = "~/Desktop/pregnancy-telo/tables/pregnancy-telo-emm1.docx",
+             path = "~/Desktop/pregnancy-telo/tables/pregnancy-telo-emm-052324.docx",
              pr_section = sect_properties)

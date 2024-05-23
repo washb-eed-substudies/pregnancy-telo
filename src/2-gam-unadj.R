@@ -2,7 +2,7 @@ rm(list=ls())
  
 source(here::here("0-config.R"))
 
-d <- readRDS("/Users/sophiatan/Downloads/bangladesh-cleaned-master-data.RDS")
+d <- readRDS("/Users/farheenjamshed/Downloads/bangladesh-cleaned-master-data (2).RDS")
 d <- d %>% filter(pregnancy_telo==1)
 #d<-readRDS(paste0(dropboxDir, "Data/Cleaned/Audrie/pregnancy_telo_covariates_data.RDS"))
 d <- d %>% mutate(vit_A_def = ifelse(RBP_inf_preg < 0.7, 1, 0),

@@ -52,7 +52,7 @@ ggplot(d1) + geom_col(aes(x=0.5, y=pred.q1)) +
         legend.position = "bottom")      
 
 
-p %>% ggsave(filename="figures/pregnancy-immune_point_diff_micronutrients.jpg", width=10, height=7)
+p %>% ggsave(filename="figures/pregnancy-telo_point_diff_micronutrients.jpg", width=10, height=7)
 
 d_for_plot <- function(x_name, y_name, x_var, y_var, spline, quart){
   d <- NULL

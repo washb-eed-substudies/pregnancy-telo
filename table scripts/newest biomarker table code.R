@@ -80,10 +80,10 @@ sect_properties <- prop_section(
   page_margins = page_mar(bottom=.3, top=.3, right=.3, left=.3, gutter = 0)
 )
 
-save_as_docx("Maternal Biomarker Table" = flextable(mom_tbl), path=here("preg-telo maternal biomarkers table 051624.docx"), 
+save_as_docx("Maternal Biomarker Table" = flextable(mom_tbl), path=here("tables/preg-telo maternal biomarkers table 052324.docx"), 
              pr_section = sect_properties) 
 
-save_as_docx("Child Biomarker Table" = flextable(child_tbl), path=here("preg-telo child biomarkers table 051624.docx"), 
+save_as_docx("Child Biomarker Table" = flextable(child_tbl), path=here("tables/preg-telo child biomarkers table 052324.docx"), 
              pr_section = sect_properties) 
 
 

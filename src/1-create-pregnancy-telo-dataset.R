@@ -112,12 +112,13 @@ d$iron_def <- ifelse(d$FERR_inf_preg < 12 | d$STFR_inf_preg > 8.3, 1, 0)
   
   
 ############## Merge in hhwealth ##################
-d_hhwealth <- read.csv("C:/Users/Sophia/Documents/ee-secondary/sophia scripts/hhwealth.csv")
+
+d_hhwealth <- read.csv(paste0(dropboxDir,"Data/Cleaned/Audrie/hhwealth.csv"))
 d1 <- left_join(d, d_hhwealth, by="dataid")
 
 
 ############## Merge in maternal sum scores ####################
-d_sum <- read.csv("C:/Users/Sophia/Documents/immune-growth/results/maternal sum score/maternal inflammation sum score.csv") %>%
+d_sum <- read.csv(paste0(dropboxDir,"Data/Cleaned/Audrie/maternal inflammation sum score.csv")) %>%
   select(-X)
 dfull <- left_join(d1, d_sum, by="dataid")
 
@@ -175,6 +176,61 @@ for(outcome in out){
 }
 
 
+
+#IPV raw survey for frequencies
+ipv_sv <-  haven::read_dta("C:/Users/andre/Dropbox/WASHB-EE-analysis/WBB-EE-analysis/Data/Untouched/MHLE_Mother_clean_data_30May16_deidentified.dta") 
+head(ipv_sv)
+labels <- sapply(ipv_sv, function(x) attr(x, "label"))
+labels <- tibble(name = names(labels),
+                 label = labels)
+labels$label<- as.character(labels$label)
+labels[grepl("ow often",labels$label),]
+
+# NEVER .................................................... 1
+# ONCE .......................................................... 2
+# SEVERAL TIMES ................................... 3
+# MANY TIMES/MOST OF THE TIME.. 4
+# DON'T KNOW ................. 8
+# REFUSED/NO ANSWER ..... 9
+
+labels[labels$name=="q_1002",]
+table(ipv_sv$q_1002)
+
+labels[labels$name=="q_808",]
+table(ipv_sv$q_808)
+
+labels[labels$name=="q_902_a",]
+table(ipv_sv$q_902_a)
+
+#Has your current/ most recent husband/partner, ever..
+labels[labels$name=="q_805_a",]
+table(ipv_sv$q_805_a)
+
+labels[labels$name=="q_805_b",]
+table(ipv_sv$q_805_b)
+
+labels[labels$name=="q_805_c",]
+table(ipv_sv$q_805_c)
+
+labels[labels$name=="q_805_d",]
+table(ipv_sv$q_805_d)
+#Note! Not enough variation for these variables to be used
+
+
+#clean and merge into the main dataset
+ipv_sv <- ipv_sv %>% select(dataid, q_1002, q_808, q_902_a) %>%
+  rename(ipv_child = q_1002, ipv_afraid = q_808, ipv_life_freq = q_902_a) %>%
+  mutate(ipv_child=case_when(ipv_child == 1 ~ "Never", ipv_child == 2 ~ "Once", ipv_child == 3 ~ "Several times", ipv_child == 4 ~"Most/all of the times" , TRUE ~ "Missing"),
+         ipv_afraid=case_when(ipv_afraid == 1 ~ "Never", ipv_afraid == 2 ~ "Once", ipv_afraid == 3 ~ "Several times", ipv_afraid == 4 ~"Most/all of the times", TRUE ~ "Missing"),
+         ipv_life_freq=case_when(ipv_life_freq == 1 ~ "Never", ipv_life_freq == 2 ~ "Once", ipv_life_freq == 3 ~ "Several times", ipv_life_freq == 4 ~ "Most/all of the times", TRUE ~ "Missing"),
+         dataid=as.numeric(dataid))
+
+head(ipv_sv)
+
+table(ipv_sv$ipv_life_freq)
+dfull <- left_join(dfull, ipv_sv, by="dataid")
+dim(dfull)
+table(dfull$ipv_life_freq)
 
 saveRDS(dfull, paste0(dropboxDir,"Data/Cleaned/Audrie/pregnancy_telo_covariates_data.RDS"))
 

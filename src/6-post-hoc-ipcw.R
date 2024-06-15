@@ -97,9 +97,10 @@ for(i in 1:ncol(Y)){
     temp <- washb_tmle_ipcw(Y=Y[,i], Delta=miss[,i], tr=d[[Xvars_bin[j]]], W=W, id=d$block, pair=NULL, family="gaussian", contrast=c(0,1), Q.SL.library = c("SL.glm"), seed=12345, print=T)
     cat(i," : ",j, "\n")
     temp <- (t(unlist(temp$estimates$ATE)))[,1:5]
+    temp$Y <- names(Y)[i]
+    temp$X <- Xvars_bin[j]
     res_adj <- bind_rows(res_adj, temp)
-    res_adj$Y <- names(Y)[i]
-    res_adj$X <- Xvars_bin[j]
+
   }
 }
 

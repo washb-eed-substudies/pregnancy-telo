@@ -98,6 +98,8 @@ for(i in 1:ncol(Y)){
     cat(i," : ",j, "\n")
     temp <- (t(unlist(temp$estimates$ATE)))[,1:5]
     res_adj <- bind_rows(res_adj, temp)
+    res_adj$Y <- names(Y)[i]
+    res_adj$X <- Xvars_bin[j]
   }
 }
 

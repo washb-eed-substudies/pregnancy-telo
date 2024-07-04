@@ -73,6 +73,10 @@ d$TS_t3_ZDelta[d$TS_t3_Z.miss==0] <- (9)
 d$delta_TS_ZDelta <- d$delta_TS_Z
 d$delta_TS_ZDelta[d$delta_TS_Z.miss==0] <- (9)
 
+#percent missing: (to do: first subset to only those with any exposure and any outcome)
+prop.table(table(d$TS_t2_Z.miss)) * 100
+prop.table(table(d$TS_t3_Z.miss)) * 100
+prop.table(table(d$delta_TS_Z.miss)) * 100
 
 #Order for replication:
 d<-d[order(d$block,d$clusterid,d$childid),]
@@ -110,3 +114,98 @@ for(i in 1:ncol(Y)){
 saveRDS(res_adj, here("results/adjusted/ipcw_res.RDS"))
 
 
+#compare to static TMLE
+Y<-d %>% select(TS_t2_Z,TS_t3_Z,delta_TS_Z)
+res_adj_tmle=NULL
+for(i in 1:ncol(Y)){
+  for(j in 1:length(Xvars_bin)){
+    
+    Wset <- pick_covariates(names(Y)[i])
+    W <- d %>% select(Wset)
+    #note the log transformation of the outcome prior to running GLM model:
+    temp <- washb_tmle(Y=Y[,i], tr=d[[Xvars_bin[j]]], W=W, id=d$block, pair=NULL, family="gaussian", contrast=c(0,1), Q.SL.library = c("SL.glm"), seed=12345, print=T)
+    cat(i," : ",j, "\n")
+    temp <- (t(unlist(temp$estimates$ATE)))[,1:5]
+    temp$Y <- names(Y)[i]
+    temp$X <- Xvars_bin[j]
+    res_adj_tmle <- bind_rows(res_adj_tmle, temp)
+    
+  }
+}
+res_adj_tmle
+
+
+
+#-------------------------------------------------------------------------
+# make comparison plot with primary results
+#-------------------------------------------------------------------------
+
+
+gam_res <- readRDS(here("results/adjusted/H1_adj_res.RDS"))
+
+res_adj <- res_adj %>% rename(ATE = psi) %>% mutate(Y = gsub("Delta", "", Y))
+gam_res <- gam_res %>% rename(ATE = point.diff, CI1=lb.diff, CI2=ub.diff)  
+
+
+plot_df <- bind_rows(res_adj %>% mutate(Analysis = "IPCW"), 
+          gam_res %>% mutate(Analysis = "Primary")) %>%
+  filter(!is.na(ATE)) %>% arrange(Y, X) %>%
+  group_by(Y, X) %>% filter(n()==2)
+head(plot_df)
+
+head(res_adj)
+head(gam_res)
+
+table(plot_df$analysis)
+
+plot_df <- plot_df %>% mutate(
+  Y_f = factor(Y, levels=c("TS_t2_Z", "TS_t3_Z", "delta_TS_Z"), labels=c("Telomeres Year 1", "Telomeres Year 2", "Telomere Change\nYear 1 and Year 2")),
+  X_f = factor(X, levels=c("vit_A_def", "vit_A_low", "iron_def", "vit_D_def"), labels=c("Vit A Deficiency","Low Vit A", "Iron Deficiency", "Vitamin D Deficiency"))
+)
+
+p <- ggplot(plot_df, aes(x=X_f, y=ATE, ymin=CI1, ymax=CI2, color=Analysis)) +
+  geom_pointrange(position=position_dodge(width=0.5)) +
+  geom_point(position=position_dodge(width=0.5), size=3) +
+  geom_hline(yintercept=0, linetype="dashed") +
+  facet_wrap(~Y_f, scales="free") +
+  coord_flip() +
+  theme_ki() +
+  theme(legend.position="bottom") +
+  labs(title="Comparison of IPCW and GAM results", x="Exposure", y="Adjusted mean difference") +
+  scale_color_manual(values=tableau10)
+p
+
+
+ggsave(p, filename="figures/ipcw_sensitivity.jpg", width=10, height=7)
+
+
+#Add in tmle for a full comparison
+res_adj_tmle <- res_adj_tmle %>% rename(ATE = psi) %>% mutate(Y = gsub("Delta", "", Y))
+plot_df <- bind_rows(res_adj %>% mutate(Analysis = "IPCW"), 
+                     res_adj_tmle %>% mutate(Analysis = "TMLE"), 
+                     gam_res %>% mutate(Analysis = "Primary")) %>%
+  filter(!is.na(ATE)) %>% arrange(Y, X) %>%
+  group_by(Y, X) %>% filter(n()==3)
+head(plot_df)
+
+head(res_adj)
+head(gam_res)
+
+table(plot_df$Analysis)
+
+plot_df <- plot_df %>% mutate(
+  Y_f = factor(Y, levels=c("TS_t2_Z", "TS_t3_Z", "delta_TS_Z"), labels=c("Telomeres Year 1", "Telomeres Year 2", "Telomere Change\nYear 1 and Year 2")),
+  X_f = factor(X, levels=c("vit_A_def", "vit_A_low", "iron_def", "vit_D_def"), labels=c("Vit A Deficiency","Low Vit A", "Iron Deficiency", "Vitamin D Deficiency"))
+)
+
+p <- ggplot(plot_df, aes(x=X_f, y=ATE, ymin=CI1, ymax=CI2, color=Analysis)) +
+  geom_pointrange(position=position_dodge(width=0.5)) +
+  geom_point(position=position_dodge(width=0.5), size=3) +
+  geom_hline(yintercept=0, linetype="dashed") +
+  facet_wrap(~Y_f, scales="free") +
+  coord_flip() +
+  theme_ki() +
+  theme(legend.position="bottom") +
+  labs(title="Comparison of IPCW and GAM results", x="Exposure", y="Adjusted mean difference") +
+  scale_color_manual(values=tableau10)
+p
